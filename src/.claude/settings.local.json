@@ -14,7 +14,9 @@
       "Bash(cd d:ProjectsOptimizelyOpti Graph Learning Centre)",
       "WebFetch(domain:chappytastic.co.uk)",
       "WebFetch(domain:docs.developers.optimizely.com)",
-      "Bash(npm run css:build:*)"
+      "Bash(npm run css:build:*)",
+      "Bash(done)",
+      "WebFetch(domain:support.optimizely.com)"
     ]
   }
 }
