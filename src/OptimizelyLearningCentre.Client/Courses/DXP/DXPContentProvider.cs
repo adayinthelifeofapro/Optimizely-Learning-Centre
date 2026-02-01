@@ -58,7 +58,11 @@ public class DXPContentProvider : ILearningContentProvider
             BuildMonitoringModule(),
             BuildSecurityModule(),
             BuildBestPracticesModule(),
-            BuildTroubleshootingModule()
+            BuildTroubleshootingModule(),
+            BuildDatabaseStorageModule(),
+            BuildContentDeliveryModule(),
+            BuildDevOpsModule(),
+            BuildMultiSiteModule()
         };
     }
 
@@ -2513,6 +2517,1458 @@ public IActionResult PersonalizedContent()
     <li>Known issues on Optimizely World</li>
     <li>Application logs for obvious errors</li>
     <li>Recent deployment or configuration changes</li>
+</ul>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 9: Database and Storage Management
+
+    private LearningModule BuildDatabaseStorageModule()
+    {
+        return new LearningModule
+        {
+            Id = "database-storage",
+            Title = "Database and Storage Management",
+            Description = "Learn to manage databases, blob storage, and data in Optimizely DXP.",
+            Icon = "circle-stack",
+            Order = 9,
+            Difficulty = ModuleDifficulty.Intermediate,
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "db-azure-sql",
+                    ModuleId = "database-storage",
+                    Title = "Azure SQL in DXP",
+                    Summary = "Understand how Azure SQL databases are provisioned and managed in DXP.",
+                    Order = 1,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand Azure SQL database architecture in DXP",
+                        "Learn about database tiers and performance",
+                        "Know how databases are provisioned per environment",
+                        "Understand connection string management"
+                    },
+                    Content = @"
+<h2>Azure SQL in DXP</h2>
+<p>Every DXP environment includes <strong>Azure SQL databases</strong> that are fully managed by Optimizely. Understanding how they work helps you optimize your solution.</p>
+
+<h3>Database Architecture</h3>
+<p>Each DXP environment typically includes:</p>
+<ul>
+    <li><strong>CMS Database</strong> - Content, pages, blocks, media metadata</li>
+    <li><strong>Commerce Database</strong> - Products, orders, customers (if Commerce is used)</li>
+    <li><strong>Application Database</strong> - Custom application data</li>
+</ul>
+
+<h3>Database Tiers</h3>
+<p>DXP uses Azure SQL with different tiers based on your subscription:</p>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Environment</th>
+            <th class=""px-4 py-2 text-left"">Typical Tier</th>
+            <th class=""px-4 py-2 text-left"">Purpose</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Integration</td><td class=""px-4 py-2"">Standard S0-S2</td><td class=""px-4 py-2"">Development/testing</td></tr>
+        <tr><td class=""px-4 py-2"">Preproduction</td><td class=""px-4 py-2"">Standard S2-S3</td><td class=""px-4 py-2"">Staging/UAT</td></tr>
+        <tr><td class=""px-4 py-2"">Production</td><td class=""px-4 py-2"">Premium P1-P4</td><td class=""px-4 py-2"">Live site</td></tr>
+    </tbody>
+</table>
+
+<h3>Connection Strings</h3>
+<p>DXP manages connection strings automatically:</p>
+<ul>
+    <li>Injected as environment variables</li>
+    <li>Named <code>EPiServerDB</code> for CMS</li>
+    <li>Named <code>EcfSqlConnection</code> for Commerce</li>
+    <li>Never hardcode - always use configuration</li>
+</ul>
+
+<h3>Database Access</h3>
+<p>Direct database access is limited for security:</p>
+<ul>
+    <li><strong>Integration</strong> - Direct access available via request</li>
+    <li><strong>Preproduction/Production</strong> - Read-only access via request</li>
+    <li>Use Azure Data Studio or SSMS with provided credentials</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "db-blob-storage",
+                    ModuleId = "database-storage",
+                    Title = "Blob Storage and Media",
+                    Summary = "Learn how media and files are stored in Azure Blob Storage.",
+                    Order = 2,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand Azure Blob Storage in DXP",
+                        "Learn how media files are stored and served",
+                        "Know about blob storage containers and organization",
+                        "Configure blob storage for optimal performance"
+                    },
+                    Content = @"
+<h2>Blob Storage in DXP</h2>
+<p>DXP uses <strong>Azure Blob Storage</strong> for storing media files, documents, and other binary content. This provides scalable, cost-effective storage.</p>
+
+<h3>How Media Storage Works</h3>
+<p>When you upload media in Optimizely CMS:</p>
+<ol>
+    <li>File is uploaded through the CMS interface</li>
+    <li>Metadata is stored in the CMS database</li>
+    <li>Binary content goes to Azure Blob Storage</li>
+    <li>CDN caches and serves the content</li>
+</ol>
+
+<h3>Blob Storage Containers</h3>
+<p>DXP organizes blobs into containers:</p>
+<ul>
+    <li><strong>mysitemedia</strong> - CMS media files</li>
+    <li><strong>mysiteassets</strong> - Static assets</li>
+    <li><strong>mysiteexports</strong> - Export files</li>
+</ul>
+
+<h3>Storage Configuration</h3>
+<pre><code>// In appsettings.json or environment config
+{
+    ""EPiServer"": {
+        ""Cms"": {
+            ""AzureBlobs"": {
+                ""ConnectionString"": ""[Managed by DXP]"",
+                ""ContainerName"": ""mysitemedia""
+            }
+        }
+    }
+}</code></pre>
+
+<h3>Best Practices</h3>
+<ul>
+    <li><strong>Use CDN URLs</strong> - Never link directly to blob storage</li>
+    <li><strong>Optimize images</strong> - Use image resizing and compression</li>
+    <li><strong>Clean up unused media</strong> - Remove orphaned files periodically</li>
+    <li><strong>Use async uploads</strong> - For large file handling</li>
+</ul>
+
+<h3>Storage Limits</h3>
+<p>DXP subscriptions include storage allocations:</p>
+<ul>
+    <li>Blob storage included in subscription</li>
+    <li>Additional storage available at extra cost</li>
+    <li>Monitor usage in DXP Management Portal</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "db-data-migration",
+                    ModuleId = "database-storage",
+                    Title = "Data Migration Strategies",
+                    Summary = "Learn strategies for migrating data between environments and from on-premises.",
+                    Order = 3,
+                    EstimatedMinutes = 15,
+                    LearningObjectives = new List<string>
+                    {
+                        "Plan database migrations to DXP",
+                        "Use database export/import tools",
+                        "Migrate content between environments",
+                        "Handle large data migrations"
+                    },
+                    Content = @"
+<h2>Data Migration Strategies</h2>
+<p>Migrating data to DXP requires careful planning, whether from on-premises or between DXP environments.</p>
+
+<h3>Migration Scenarios</h3>
+
+<h4>On-Premises to DXP</h4>
+<p>Moving from self-hosted to DXP:</p>
+<ol>
+    <li>Export database backup (.bacpac)</li>
+    <li>Request import to Integration environment</li>
+    <li>Verify data integrity</li>
+    <li>Promote through environments</li>
+</ol>
+
+<h4>Environment to Environment</h4>
+<p>Moving data between DXP environments:</p>
+<ul>
+    <li><strong>Content</strong> - Use export/import in CMS admin</li>
+    <li><strong>Database</strong> - Request database sync from support</li>
+    <li><strong>Media</strong> - Synced with database</li>
+</ul>
+
+<h3>Database Export/Import</h3>
+<pre><code># Export database (on-premises)
+SqlPackage.exe /Action:Export /SourceServerName:localhost
+    /SourceDatabaseName:EPiServerDB
+    /TargetFile:episerver.bacpac
+
+# Import requires DXP support ticket
+# They will import the .bacpac to your environment</code></pre>
+
+<h3>Content Export/Import</h3>
+<p>CMS provides built-in content transfer:</p>
+<ol>
+    <li>Admin → Scheduled Jobs → Export Content</li>
+    <li>Select content tree to export</li>
+    <li>Download export package</li>
+    <li>Import in target environment</li>
+</ol>
+
+<h3>Large Migration Best Practices</h3>
+<ul>
+    <li><strong>Plan downtime</strong> - Large imports take time</li>
+    <li><strong>Test in Integration first</strong> - Never go direct to production</li>
+    <li><strong>Verify data</strong> - Check counts and samples</li>
+    <li><strong>Update connection strings</strong> - Ensure they point to new DBs</li>
+    <li><strong>Clear caches</strong> - After migration completes</li>
+</ul>
+
+<h3>Data Synchronization</h3>
+<p>For ongoing sync between environments:</p>
+<ul>
+    <li>Content channels for specific content sync</li>
+    <li>Scheduled database refreshes (via support)</li>
+    <li>API-based content replication</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "db-backup-recovery",
+                    ModuleId = "database-storage",
+                    Title = "Backup and Recovery",
+                    Summary = "Understand DXP backup policies and disaster recovery procedures.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand DXP backup policies",
+                        "Learn about point-in-time recovery",
+                        "Know disaster recovery procedures",
+                        "Plan for business continuity"
+                    },
+                    Content = @"
+<h2>Backup and Recovery</h2>
+<p>DXP provides <strong>automated backups</strong> for databases and blob storage, ensuring your data is protected.</p>
+
+<h3>Automated Backups</h3>
+<p>DXP backup schedule:</p>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Backup Type</th>
+            <th class=""px-4 py-2 text-left"">Frequency</th>
+            <th class=""px-4 py-2 text-left"">Retention</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Full Database</td><td class=""px-4 py-2"">Weekly</td><td class=""px-4 py-2"">35 days</td></tr>
+        <tr><td class=""px-4 py-2"">Differential</td><td class=""px-4 py-2"">Daily</td><td class=""px-4 py-2"">35 days</td></tr>
+        <tr><td class=""px-4 py-2"">Transaction Log</td><td class=""px-4 py-2"">Every 5-10 min</td><td class=""px-4 py-2"">35 days</td></tr>
+        <tr><td class=""px-4 py-2"">Blob Storage</td><td class=""px-4 py-2"">Continuous</td><td class=""px-4 py-2"">Geo-redundant</td></tr>
+    </tbody>
+</table>
+
+<h3>Point-in-Time Recovery</h3>
+<p>Azure SQL allows recovery to any point within the retention period:</p>
+<ul>
+    <li>Contact DXP support with desired timestamp</li>
+    <li>Recovery is to a new database</li>
+    <li>You verify and then swap if correct</li>
+    <li>Available for all environments</li>
+</ul>
+
+<h3>Disaster Recovery</h3>
+<p>DXP infrastructure is designed for resilience:</p>
+<ul>
+    <li><strong>Geo-redundant storage</strong> - Data replicated across regions</li>
+    <li><strong>Database geo-replication</strong> - Available for Production</li>
+    <li><strong>Azure availability zones</strong> - Infrastructure redundancy</li>
+</ul>
+
+<h3>Recovery Procedures</h3>
+
+<h4>Accidental Data Deletion</h4>
+<ol>
+    <li>Contact DXP support immediately</li>
+    <li>Provide timestamp of deletion</li>
+    <li>Request point-in-time restore</li>
+    <li>Verify recovered data</li>
+</ol>
+
+<h4>Full Environment Recovery</h4>
+<ol>
+    <li>Support initiates recovery</li>
+    <li>Database restored from backup</li>
+    <li>Blob storage recovered</li>
+    <li>Application redeployed if needed</li>
+</ol>
+
+<h3>Your Responsibilities</h3>
+<ul>
+    <li>Test recovery procedures periodically</li>
+    <li>Document critical data locations</li>
+    <li>Maintain local development backups</li>
+    <li>Know your RPO/RTO requirements</li>
+</ul>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 10: Content Delivery and Performance
+
+    private LearningModule BuildContentDeliveryModule()
+    {
+        return new LearningModule
+        {
+            Id = "content-delivery",
+            Title = "Content Delivery and Performance",
+            Description = "Optimize content delivery, caching, and performance in DXP.",
+            Icon = "bolt",
+            Order = 10,
+            Difficulty = ModuleDifficulty.Intermediate,
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "cd-cdn-deep-dive",
+                    ModuleId = "content-delivery",
+                    Title = "CDN Deep Dive",
+                    Summary = "Master CDN configuration and optimization in DXP.",
+                    Order = 1,
+                    EstimatedMinutes = 15,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand CDN architecture in DXP",
+                        "Configure cache rules and TTLs",
+                        "Implement cache invalidation",
+                        "Optimize CDN performance"
+                    },
+                    Content = @"
+<h2>CDN Deep Dive</h2>
+<p>DXP uses <strong>Cloudflare</strong> as its CDN, providing global content delivery, DDoS protection, and edge caching.</p>
+
+<h3>CDN Architecture</h3>
+<p>Request flow through DXP CDN:</p>
+<ol>
+    <li>User requests page</li>
+    <li>Request hits Cloudflare edge</li>
+    <li>If cached, serve from edge (fast)</li>
+    <li>If not cached, forward to origin</li>
+    <li>Origin responds, CDN caches, serves user</li>
+</ol>
+
+<h3>Cache Levels</h3>
+<ul>
+    <li><strong>Edge cache</strong> - Cloudflare global network</li>
+    <li><strong>Origin shield</strong> - Reduces origin load</li>
+    <li><strong>Application cache</strong> - In-memory on web apps</li>
+</ul>
+
+<h3>Cache Control Headers</h3>
+<p>Control caching behavior with headers:</p>
+<pre><code>// In your controller or middleware
+Response.Headers[""Cache-Control""] = ""public, max-age=3600"";
+Response.Headers[""CDN-Cache-Control""] = ""max-age=86400"";
+Response.Headers[""Surrogate-Control""] = ""max-age=604800"";</code></pre>
+
+<h3>Cache-Control Values</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Content Type</th>
+            <th class=""px-4 py-2 text-left"">Recommended TTL</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Static assets (CSS/JS)</td><td class=""px-4 py-2"">1 year (with versioning)</td></tr>
+        <tr><td class=""px-4 py-2"">Images</td><td class=""px-4 py-2"">1 month to 1 year</td></tr>
+        <tr><td class=""px-4 py-2"">HTML pages</td><td class=""px-4 py-2"">Minutes to hours</td></tr>
+        <tr><td class=""px-4 py-2"">API responses</td><td class=""px-4 py-2"">Varies by data freshness</td></tr>
+    </tbody>
+</table>
+
+<h3>Cache Invalidation</h3>
+<p>When content changes, invalidate caches:</p>
+<ul>
+    <li><strong>Automatic</strong> - CMS publishes trigger cache clear</li>
+    <li><strong>Manual</strong> - Via DXP portal or API</li>
+    <li><strong>Selective</strong> - Clear specific URLs or patterns</li>
+</ul>
+
+<h3>Bypass Caching</h3>
+<p>Sometimes you need to bypass cache:</p>
+<ul>
+    <li>Use <code>Cache-Control: no-store</code> for sensitive content</li>
+    <li>Add <code>?nocache=1</code> for testing</li>
+    <li>Use POST requests (not cached by default)</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "cd-output-caching",
+                    ModuleId = "content-delivery",
+                    Title = "Output Caching Strategies",
+                    Summary = "Implement effective output caching for CMS pages.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Configure output caching in Optimizely CMS",
+                        "Implement cache profiles for different content types",
+                        "Handle cache variations for personalization",
+                        "Debug caching issues"
+                    },
+                    Content = @"
+<h2>Output Caching Strategies</h2>
+<p>Output caching stores rendered HTML, dramatically reducing server load and response times.</p>
+
+<h3>Enabling Output Cache</h3>
+<pre><code>// In Startup.cs or Program.cs
+services.AddOutputCache(options =>
+{
+    options.AddPolicy(""ContentPages"", builder =>
+        builder.Expire(TimeSpan.FromMinutes(10))
+               .Tag(""content""));
+});
+
+// On controller or page
+[OutputCache(PolicyName = ""ContentPages"")]
+public IActionResult Index()
+{
+    return View();
+}</code></pre>
+
+<h3>Cache Profiles</h3>
+<p>Define profiles for different content types:</p>
+<pre><code>// appsettings.json
+{
+    ""EPiServer"": {
+        ""Caching"": {
+            ""OutputCacheProfiles"": {
+                ""Default"": { ""Duration"": 300 },
+                ""LongLived"": { ""Duration"": 3600 },
+                ""NoCache"": { ""Duration"": 0, ""NoStore"": true }
+            }
+        }
+    }
+}</code></pre>
+
+<h3>Cache Variations</h3>
+<p>Vary cache by different factors:</p>
+<ul>
+    <li><strong>VaryByQueryKeys</strong> - Different cache per query string</li>
+    <li><strong>VaryByHeader</strong> - Vary by Accept-Language, etc.</li>
+    <li><strong>VaryByUser</strong> - Per-user caching (use carefully)</li>
+</ul>
+
+<h3>Optimizely CMS Integration</h3>
+<pre><code>// Use IContentCacheKeyCreator for CMS content
+public class MyCachePolicy : IOutputCachePolicy
+{
+    private readonly IContentCacheKeyCreator _keyCreator;
+
+    public ValueTask CacheRequestAsync(OutputCacheContext context,
+        CancellationToken ct)
+    {
+        // Get content reference from route
+        var contentLink = GetContentLink(context);
+        context.Tags.Add(_keyCreator.CreateCacheKey(contentLink));
+        return ValueTask.CompletedTask;
+    }
+}</code></pre>
+
+<h3>Cache Invalidation with CMS</h3>
+<p>CMS automatically invalidates when content changes:</p>
+<ul>
+    <li>Content publish clears related cache entries</li>
+    <li>Uses cache dependencies on content versions</li>
+    <li>Propagates across web app instances</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "cd-image-optimization",
+                    ModuleId = "content-delivery",
+                    Title = "Image Optimization",
+                    Summary = "Optimize images for fast delivery and great user experience.",
+                    Order = 3,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Implement responsive images",
+                        "Use image resizing services",
+                        "Optimize image formats (WebP, AVIF)",
+                        "Lazy load images effectively"
+                    },
+                    Content = @"
+<h2>Image Optimization</h2>
+<p>Images often account for <strong>50-80% of page weight</strong>. Optimizing them is crucial for performance.</p>
+
+<h3>Responsive Images</h3>
+<p>Serve appropriate image sizes:</p>
+<pre><code>&lt;picture&gt;
+    &lt;source srcset=""image-800.webp"" media=""(min-width: 800px)"" type=""image/webp""&gt;
+    &lt;source srcset=""image-400.webp"" media=""(min-width: 400px)"" type=""image/webp""&gt;
+    &lt;img src=""image-400.jpg"" alt=""Description"" loading=""lazy""&gt;
+&lt;/picture&gt;</code></pre>
+
+<h3>Image Resizing in CMS</h3>
+<p>Use ImageResizer or built-in image processing:</p>
+<pre><code>// Using URL parameters
+/globalassets/myimage.jpg?width=800&height=600&mode=crop
+
+// In Razor views
+@Html.Picture(Model.CurrentPage.Image,
+    new PictureProfile { Width = 800, Height = 600 })</code></pre>
+
+<h3>Modern Formats</h3>
+<p>Use WebP and AVIF for better compression:</p>
+<ul>
+    <li><strong>WebP</strong> - 25-35% smaller than JPEG, wide support</li>
+    <li><strong>AVIF</strong> - 50% smaller than JPEG, growing support</li>
+    <li>Serve with <code>&lt;picture&gt;</code> element for fallback</li>
+</ul>
+
+<h3>Lazy Loading</h3>
+<pre><code>// Native lazy loading
+&lt;img src=""image.jpg"" loading=""lazy"" alt=""...""&gt;
+
+// Or with Intersection Observer for more control
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.src = entry.target.dataset.src;
+        }
+    });
+});
+document.querySelectorAll('img[data-src]').forEach(img => observer.observe(img));</code></pre>
+
+<h3>CDN Image Optimization</h3>
+<p>Cloudflare provides automatic optimization:</p>
+<ul>
+    <li>Polish - Lossless or lossy compression</li>
+    <li>Mirage - Mobile-optimized images</li>
+    <li>Format conversion - Auto WebP delivery</li>
+</ul>
+
+<h3>Image Best Practices</h3>
+<ul>
+    <li>Define maximum upload dimensions</li>
+    <li>Use descriptive alt text</li>
+    <li>Implement srcset for responsive images</li>
+    <li>Consider aspect ratio containers</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "cd-performance-monitoring",
+                    ModuleId = "content-delivery",
+                    Title = "Performance Monitoring",
+                    Summary = "Monitor and measure site performance in DXP.",
+                    Order = 4,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Use Application Insights for performance",
+                        "Track Core Web Vitals",
+                        "Set up performance budgets",
+                        "Identify and resolve bottlenecks"
+                    },
+                    Content = @"
+<h2>Performance Monitoring</h2>
+<p>Continuous monitoring helps identify performance issues before they impact users.</p>
+
+<h3>Core Web Vitals</h3>
+<p>Google's key metrics for user experience:</p>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Metric</th>
+            <th class=""px-4 py-2 text-left"">Good</th>
+            <th class=""px-4 py-2 text-left"">What it Measures</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">LCP</td><td class=""px-4 py-2"">&lt;2.5s</td><td class=""px-4 py-2"">Largest Contentful Paint - Loading</td></tr>
+        <tr><td class=""px-4 py-2"">INP</td><td class=""px-4 py-2"">&lt;200ms</td><td class=""px-4 py-2"">Interaction to Next Paint - Responsiveness</td></tr>
+        <tr><td class=""px-4 py-2"">CLS</td><td class=""px-4 py-2"">&lt;0.1</td><td class=""px-4 py-2"">Cumulative Layout Shift - Stability</td></tr>
+    </tbody>
+</table>
+
+<h3>Application Insights</h3>
+<p>Built into DXP for server-side monitoring:</p>
+<pre><code>// Track custom performance metrics
+var telemetry = new TelemetryClient();
+var stopwatch = Stopwatch.StartNew();
+
+// Your operation
+await ProcessOrder(order);
+
+stopwatch.Stop();
+telemetry.TrackMetric(""OrderProcessingTime"", stopwatch.ElapsedMilliseconds);</code></pre>
+
+<h3>Real User Monitoring (RUM)</h3>
+<p>Track actual user experiences:</p>
+<pre><code>// Application Insights JavaScript SDK
+&lt;script&gt;
+var appInsights = window.appInsights || function(config) {
+    // ... initialization
+};
+appInsights.trackPageView();
+&lt;/script&gt;</code></pre>
+
+<h3>Performance Budgets</h3>
+<p>Set limits to prevent regression:</p>
+<ul>
+    <li>Page weight: &lt;1.5MB</li>
+    <li>JavaScript: &lt;300KB (compressed)</li>
+    <li>Time to Interactive: &lt;3.5s</li>
+    <li>Number of requests: &lt;50</li>
+</ul>
+
+<h3>Identifying Bottlenecks</h3>
+<ul>
+    <li><strong>Slow queries</strong> - Check SQL execution times</li>
+    <li><strong>External calls</strong> - API latency issues</li>
+    <li><strong>Memory pressure</strong> - GC pauses</li>
+    <li><strong>Render blocking</strong> - CSS/JS loading</li>
+</ul>
+
+<h3>Tools</h3>
+<ul>
+    <li>Application Insights - Server metrics</li>
+    <li>Lighthouse - Page audits</li>
+    <li>WebPageTest - Detailed waterfall</li>
+    <li>Chrome DevTools - Real-time debugging</li>
+</ul>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 11: DevOps and CI/CD
+
+    private LearningModule BuildDevOpsModule()
+    {
+        return new LearningModule
+        {
+            Id = "devops-cicd",
+            Title = "DevOps and CI/CD",
+            Description = "Implement continuous integration and deployment pipelines for DXP.",
+            Icon = "arrow-path",
+            Order = 11,
+            Difficulty = ModuleDifficulty.Advanced,
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "do-pipeline-basics",
+                    ModuleId = "devops-cicd",
+                    Title = "CI/CD Pipeline Fundamentals",
+                    Summary = "Design effective CI/CD pipelines for DXP deployments.",
+                    Order = 1,
+                    EstimatedMinutes = 15,
+                    LearningObjectives = new List<string>
+                    {
+                        "Design CI/CD pipelines for DXP",
+                        "Choose between Azure DevOps and GitHub Actions",
+                        "Implement build and test stages",
+                        "Automate deployment to DXP"
+                    },
+                    Content = @"
+<h2>CI/CD Pipeline Fundamentals</h2>
+<p>Automated pipelines ensure <strong>consistent, reliable deployments</strong> to DXP environments.</p>
+
+<h3>Pipeline Stages</h3>
+<ol>
+    <li><strong>Build</strong> - Compile code, restore packages</li>
+    <li><strong>Test</strong> - Run unit and integration tests</li>
+    <li><strong>Package</strong> - Create deployment package</li>
+    <li><strong>Deploy</strong> - Push to DXP environment</li>
+    <li><strong>Verify</strong> - Smoke tests, health checks</li>
+</ol>
+
+<h3>Pipeline Tools</h3>
+<p>Common choices for DXP projects:</p>
+<ul>
+    <li><strong>Azure DevOps</strong> - Tight Azure integration</li>
+    <li><strong>GitHub Actions</strong> - Modern, flexible</li>
+    <li><strong>Jenkins</strong> - Self-hosted option</li>
+    <li><strong>TeamCity</strong> - .NET-friendly</li>
+</ul>
+
+<h3>DXP Deployment API</h3>
+<p>Pipelines use the DXP Deployment API:</p>
+<pre><code># Start deployment
+curl -X POST ""https://paasportal.episerver.net/api/v1.0/deployments"" \
+    -H ""Authorization: Bearer $DXP_API_KEY"" \
+    -d '{
+        ""projectId"": ""your-project-id"",
+        ""targetEnvironment"": ""Integration"",
+        ""packageUrl"": ""https://storage.blob/package.zip""
+    }'</code></pre>
+
+<h3>Environment Promotion</h3>
+<p>Typical promotion flow:</p>
+<ol>
+    <li>Developer commits to feature branch</li>
+    <li>PR triggers build + tests</li>
+    <li>Merge to main deploys to Integration</li>
+    <li>Manual approval promotes to Preproduction</li>
+    <li>Manual approval promotes to Production</li>
+</ol>
+
+<h3>Best Practices</h3>
+<ul>
+    <li>Never deploy directly to Production</li>
+    <li>Always test in Preproduction first</li>
+    <li>Use approval gates for Production</li>
+    <li>Keep builds fast (&lt;10 minutes)</li>
+    <li>Version your packages clearly</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "do-azure-devops",
+                    ModuleId = "devops-cicd",
+                    Title = "Azure DevOps Pipelines",
+                    Summary = "Configure Azure DevOps for DXP deployments.",
+                    Order = 2,
+                    EstimatedMinutes = 15,
+                    LearningObjectives = new List<string>
+                    {
+                        "Set up Azure DevOps for DXP",
+                        "Configure build pipelines",
+                        "Implement release pipelines",
+                        "Manage secrets and variables"
+                    },
+                    Content = @"
+<h2>Azure DevOps Pipelines</h2>
+<p>Azure DevOps provides comprehensive CI/CD capabilities well-suited for DXP.</p>
+
+<h3>Build Pipeline (azure-pipelines.yml)</h3>
+<pre><code>trigger:
+  - main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildJob
+    steps:
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solution)'
+
+    - task: VSBuild@1
+      inputs:
+        solution: '$(solution)'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+    - task: VSTest@2
+      inputs:
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'</code></pre>
+
+<h3>Release Pipeline</h3>
+<p>Configure release stages:</p>
+<ul>
+    <li><strong>Integration</strong> - Automatic deployment on build</li>
+    <li><strong>Preproduction</strong> - Manual approval required</li>
+    <li><strong>Production</strong> - Manual approval + scheduled window</li>
+</ul>
+
+<h3>DXP Deployment Task</h3>
+<pre><code># Using PowerShell task to deploy
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      $headers = @{
+        ""Authorization"" = ""Bearer $(DXP_API_KEY)""
+        ""Content-Type"" = ""application/json""
+      }
+      $body = @{
+        projectId = ""$(DXP_PROJECT_ID)""
+        targetEnvironment = ""Integration""
+        packageUrl = ""$(PackageUrl)""
+      } | ConvertTo-Json
+
+      Invoke-RestMethod -Uri ""https://paasportal.episerver.net/api/v1.0/deployments"" `
+        -Method Post -Headers $headers -Body $body</code></pre>
+
+<h3>Variable Groups</h3>
+<p>Store secrets securely:</p>
+<ul>
+    <li>Create variable group for DXP credentials</li>
+    <li>Link to Azure Key Vault for secrets</li>
+    <li>Reference as <code>$(VariableName)</code></li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "do-github-actions",
+                    ModuleId = "devops-cicd",
+                    Title = "GitHub Actions for DXP",
+                    Summary = "Use GitHub Actions to automate DXP deployments.",
+                    Order = 3,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Set up GitHub Actions workflows",
+                        "Build .NET projects in Actions",
+                        "Deploy to DXP from GitHub",
+                        "Use GitHub secrets for credentials"
+                    },
+                    Content = @"
+<h2>GitHub Actions for DXP</h2>
+<p>GitHub Actions provides a modern, flexible approach to CI/CD for DXP projects.</p>
+
+<h3>Workflow File (.github/workflows/deploy.yml)</h3>
+<pre><code>name: Build and Deploy to DXP
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Test
+      run: dotnet test --no-build --configuration Release
+
+    - name: Publish
+      run: dotnet publish -c Release -o ./publish
+
+    - name: Create deployment package
+      run: Compress-Archive -Path ./publish/* -DestinationPath ./deploy.zip
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-package
+        path: ./deploy.zip
+
+  deploy-integration:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: integration
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: deployment-package
+
+    - name: Deploy to DXP Integration
+      run: |
+        # Upload package and deploy via DXP API
+        curl -X POST ""https://paasportal.episerver.net/api/v1.0/deployments"" \
+          -H ""Authorization: Bearer ${{ secrets.DXP_API_KEY }}"" \
+          -H ""Content-Type: application/json"" \
+          -d '{
+            ""projectId"": ""${{ secrets.DXP_PROJECT_ID }}"",
+            ""targetEnvironment"": ""Integration""
+          }'</code></pre>
+
+<h3>GitHub Secrets</h3>
+<p>Store sensitive data in repository secrets:</p>
+<ul>
+    <li><code>DXP_API_KEY</code> - Your DXP API key</li>
+    <li><code>DXP_PROJECT_ID</code> - Your DXP project ID</li>
+    <li><code>AZURE_STORAGE_CONNECTION</code> - For package uploads</li>
+</ul>
+
+<h3>Environments and Approvals</h3>
+<p>Configure protected environments:</p>
+<ul>
+    <li>Settings → Environments → New</li>
+    <li>Add required reviewers for Production</li>
+    <li>Set deployment branches</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "do-testing-strategies",
+                    ModuleId = "devops-cicd",
+                    Title = "Automated Testing Strategies",
+                    Summary = "Implement comprehensive testing in your DXP pipeline.",
+                    Order = 4,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Implement unit tests for CMS code",
+                        "Set up integration tests",
+                        "Create smoke tests for deployments",
+                        "Use test containers for database tests"
+                    },
+                    Content = @"
+<h2>Automated Testing Strategies</h2>
+<p>Comprehensive testing catches issues before they reach production.</p>
+
+<h3>Test Pyramid</h3>
+<ul>
+    <li><strong>Unit Tests (Many)</strong> - Fast, isolated, test logic</li>
+    <li><strong>Integration Tests (Some)</strong> - Test component interactions</li>
+    <li><strong>E2E Tests (Few)</strong> - Test full user flows</li>
+</ul>
+
+<h3>Unit Testing CMS Code</h3>
+<pre><code>[TestClass]
+public class ProductPageTests
+{
+    private Mock&lt;IContentLoader&gt; _contentLoader;
+    private ProductPageController _controller;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _contentLoader = new Mock&lt;IContentLoader&gt;();
+        _controller = new ProductPageController(_contentLoader.Object);
+    }
+
+    [TestMethod]
+    public void Index_ReturnsViewWithProducts()
+    {
+        // Arrange
+        var products = new List&lt;ProductPage&gt; { new ProductPage() };
+        _contentLoader.Setup(x => x.GetChildren&lt;ProductPage&gt;(It.IsAny&lt;ContentReference&gt;()))
+            .Returns(products);
+
+        // Act
+        var result = _controller.Index() as ViewResult;
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual(products, result.Model);
+    }
+}</code></pre>
+
+<h3>Integration Tests</h3>
+<pre><code>[TestClass]
+public class ContentServiceIntegrationTests
+{
+    private WebApplicationFactory&lt;Program&gt; _factory;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _factory = new WebApplicationFactory&lt;Program&gt;()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    // Use in-memory database
+                    services.AddDbContext&lt;CmsDbContext&gt;(options =>
+                        options.UseInMemoryDatabase(""TestDb""));
+                });
+            });
+    }
+
+    [TestMethod]
+    public async Task GetPage_ReturnsContent()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync(""/en/products/"");
+        response.EnsureSuccessStatusCode();
+    }
+}</code></pre>
+
+<h3>Smoke Tests After Deployment</h3>
+<pre><code># In pipeline after deployment
+- name: Smoke Tests
+  run: |
+    # Check site is responding
+    curl -f https://your-site.azurewebsites.net/health
+
+    # Check key pages
+    curl -f https://your-site.azurewebsites.net/
+    curl -f https://your-site.azurewebsites.net/products/</code></pre>
+
+<h3>Test Data Management</h3>
+<ul>
+    <li>Use fixtures for consistent test data</li>
+    <li>Reset database between test runs</li>
+    <li>Mock external services</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "do-infrastructure-code",
+                    ModuleId = "devops-cicd",
+                    Title = "Infrastructure as Code",
+                    Summary = "Manage DXP configuration and infrastructure as code.",
+                    Order = 5,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Version control configuration",
+                        "Use transforms for environment-specific settings",
+                        "Manage secrets securely",
+                        "Document infrastructure decisions"
+                    },
+                    Content = @"
+<h2>Infrastructure as Code</h2>
+<p>Treating configuration as code ensures <strong>reproducible, auditable</strong> environments.</p>
+
+<h3>Configuration Management</h3>
+<p>Store configuration in version control:</p>
+<pre><code>src/
+├── appsettings.json           # Base settings
+├── appsettings.Development.json
+├── appsettings.Integration.json
+├── appsettings.Preproduction.json
+└── appsettings.Production.json</code></pre>
+
+<h3>Environment Transforms</h3>
+<pre><code>// appsettings.Integration.json
+{
+    ""ConnectionStrings"": {
+        ""EPiServerDB"": ""[Injected by DXP]""
+    },
+    ""Logging"": {
+        ""LogLevel"": {
+            ""Default"": ""Debug""
+        }
+    },
+    ""Features"": {
+        ""EnableBetaFeatures"": true
+    }
+}</code></pre>
+
+<h3>Secrets Management</h3>
+<p>Never commit secrets to source control:</p>
+<ul>
+    <li>Use Azure Key Vault for production secrets</li>
+    <li>Use User Secrets for local development</li>
+    <li>Reference via environment variables</li>
+</ul>
+
+<pre><code>// Access Key Vault in DXP
+builder.Configuration.AddAzureKeyVault(
+    new Uri(""https://your-vault.vault.azure.net/""),
+    new DefaultAzureCredential());</code></pre>
+
+<h3>Configuration Documentation</h3>
+<p>Maintain a configuration inventory:</p>
+<ul>
+    <li>Document each setting's purpose</li>
+    <li>Note which settings vary by environment</li>
+    <li>Track who can modify what</li>
+</ul>
+
+<h3>Benefits</h3>
+<ul>
+    <li><strong>Audit trail</strong> - Git history shows all changes</li>
+    <li><strong>Rollback</strong> - Easy to revert bad config</li>
+    <li><strong>Review</strong> - PRs for config changes</li>
+    <li><strong>Consistency</strong> - Environments are predictable</li>
+</ul>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 12: Multi-Site and Multi-Language
+
+    private LearningModule BuildMultiSiteModule()
+    {
+        return new LearningModule
+        {
+            Id = "multi-site",
+            Title = "Multi-Site and Multi-Language",
+            Description = "Manage multiple sites and languages in DXP.",
+            Icon = "globe-alt",
+            Order = 12,
+            Difficulty = ModuleDifficulty.Intermediate,
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "ms-multi-site-architecture",
+                    ModuleId = "multi-site",
+                    Title = "Multi-Site Architecture",
+                    Summary = "Design and implement multi-site solutions in DXP.",
+                    Order = 1,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand multi-site architecture options",
+                        "Configure site definitions",
+                        "Share content across sites",
+                        "Manage site-specific settings"
+                    },
+                    Content = @"
+<h2>Multi-Site Architecture</h2>
+<p>DXP supports <strong>multiple sites</strong> within a single installation, sharing code and optionally content.</p>
+
+<h3>Architecture Options</h3>
+
+<h4>Single Codebase, Multiple Sites</h4>
+<ul>
+    <li>All sites share the same application code</li>
+    <li>Content can be shared or separate</li>
+    <li>Different domains/URLs per site</li>
+    <li>Most common approach</li>
+</ul>
+
+<h4>Separate Content Trees</h4>
+<ul>
+    <li>Each site has its own content root</li>
+    <li>Clear separation of content</li>
+    <li>Easier permissions management</li>
+</ul>
+
+<h3>Site Definition</h3>
+<pre><code>// In CMS Admin or code
+public class SiteDefinitionInitialization : IInitializableModule
+{
+    public void Initialize(InitializationEngine context)
+    {
+        var siteRepo = context.Locate.Advanced.GetInstance&lt;ISiteDefinitionRepository&gt;();
+
+        var brandA = new SiteDefinition
+        {
+            Name = ""Brand A"",
+            SiteUrl = new Uri(""https://brand-a.com""),
+            StartPage = new ContentReference(5)
+        };
+
+        siteRepo.Save(brandA);
+    }
+}</code></pre>
+
+<h3>Domain Mapping</h3>
+<p>Map domains to sites:</p>
+<ul>
+    <li><code>brand-a.com</code> → Brand A site</li>
+    <li><code>brand-b.com</code> → Brand B site</li>
+    <li><code>www.brand-a.com</code> → Redirect or same site</li>
+</ul>
+
+<h3>Shared Resources</h3>
+<p>Share assets across sites:</p>
+<ul>
+    <li><strong>Global Assets folder</strong> - Shared images, documents</li>
+    <li><strong>Shared Blocks</strong> - Reusable components</li>
+    <li><strong>Common Templates</strong> - Same page types</li>
+</ul>
+
+<h3>Site-Specific Settings</h3>
+<pre><code>// Site settings page type
+[ContentType(GUID = ""..."")]
+public class SiteSettingsPage : PageData
+{
+    public virtual string SiteName { get; set; }
+    public virtual string LogoUrl { get; set; }
+    public virtual string PrimaryColor { get; set; }
+}</code></pre>
+"
+                },
+                new Lesson
+                {
+                    Id = "ms-language-management",
+                    ModuleId = "multi-site",
+                    Title = "Language Management",
+                    Summary = "Configure and manage multiple languages in CMS.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Enable and configure languages",
+                        "Implement language fallback",
+                        "Create language-specific content",
+                        "Handle URL structures for languages"
+                    },
+                    Content = @"
+<h2>Language Management</h2>
+<p>Optimizely CMS provides <strong>built-in multi-language support</strong> for content, allowing easy translation management.</p>
+
+<h3>Enabling Languages</h3>
+<p>In CMS Admin → Config → Manage Languages:</p>
+<ol>
+    <li>Enable desired languages</li>
+    <li>Set one as master language</li>
+    <li>Configure access rights per language</li>
+</ol>
+
+<h3>Language Configuration</h3>
+<pre><code>// In code
+services.Configure&lt;ExpressionFilterOptions&gt;(options =>
+{
+    options.Enabled = true;
+});
+
+services.Configure&lt;LanguageOptions&gt;(options =>
+{
+    options.DefaultLanguage = ""en"";
+    options.FallbackBehavior = LanguageFallbackBehavior.Fallback;
+});</code></pre>
+
+<h3>Fallback Behavior</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Behavior</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">None</td><td class=""px-4 py-2"">404 if content not in requested language</td></tr>
+        <tr><td class=""px-4 py-2"">Fallback</td><td class=""px-4 py-2"">Show master language if translation missing</td></tr>
+        <tr><td class=""px-4 py-2"">Replace</td><td class=""px-4 py-2"">Replace with fallback content inline</td></tr>
+    </tbody>
+</table>
+
+<h3>URL Structures</h3>
+<p>Options for language in URLs:</p>
+<ul>
+    <li><strong>Path prefix</strong>: <code>/en/products/</code>, <code>/de/products/</code></li>
+    <li><strong>Subdomain</strong>: <code>en.site.com</code>, <code>de.site.com</code></li>
+    <li><strong>Separate domain</strong>: <code>site.com</code>, <code>site.de</code></li>
+</ul>
+
+<h3>Translation Workflow</h3>
+<ol>
+    <li>Create content in master language</li>
+    <li>Click ""Translate"" to create language branch</li>
+    <li>Edit in target language</li>
+    <li>Publish each language separately</li>
+</ol>
+
+<h3>Hreflang Tags</h3>
+<pre><code>@foreach (var lang in Model.AvailableLanguages)
+{
+    &lt;link rel=""alternate"" hreflang=""@lang.Code"" href=""@lang.Url"" /&gt;
+}
+&lt;link rel=""alternate"" hreflang=""x-default"" href=""@Model.DefaultUrl"" /&gt;</code></pre>
+"
+                },
+                new Lesson
+                {
+                    Id = "ms-content-localization",
+                    ModuleId = "multi-site",
+                    Title = "Content Localization",
+                    Summary = "Implement effective content localization strategies.",
+                    Order = 3,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Plan content localization",
+                        "Handle locale-specific content",
+                        "Implement resource strings",
+                        "Manage translation workflows"
+                    },
+                    Content = @"
+<h2>Content Localization</h2>
+<p>Effective localization goes beyond translation to include <strong>cultural adaptation</strong> of content.</p>
+
+<h3>Localization Scope</h3>
+<ul>
+    <li><strong>Content</strong> - Pages, blocks, text</li>
+    <li><strong>Media</strong> - Images with text, videos</li>
+    <li><strong>UI strings</strong> - Labels, buttons, messages</li>
+    <li><strong>Data formats</strong> - Dates, numbers, currency</li>
+</ul>
+
+<h3>Resource Strings</h3>
+<pre><code>// Resources/Views.en.xml
+&lt;?xml version=""1.0"" encoding=""utf-8""?&gt;
+&lt;languages&gt;
+    &lt;language name=""English"" id=""en""&gt;
+        &lt;common&gt;
+            &lt;readmore&gt;Read more&lt;/readmore&gt;
+            &lt;submit&gt;Submit&lt;/submit&gt;
+        &lt;/common&gt;
+    &lt;/language&gt;
+&lt;/languages&gt;
+
+// In views
+@Html.Translate(""/common/readmore"")</code></pre>
+
+<h3>Locale-Specific Content</h3>
+<pre><code>// Different images per locale
+[UIHint(UIHint.Image)]
+[CultureSpecific]
+public virtual ContentReference HeroImage { get; set; }
+
+// Locale-specific blocks
+[CultureSpecific]
+public virtual ContentArea LocalPromotions { get; set; }</code></pre>
+
+<h3>Number and Date Formatting</h3>
+<pre><code>// Use culture-aware formatting
+@Model.Price.ToString(""C"", CultureInfo.CurrentCulture)
+// UK: £100.00, US: $100.00, DE: 100,00 €
+
+@Model.Date.ToString(""d"", CultureInfo.CurrentCulture)
+// UK: 15/01/2024, US: 1/15/2024, DE: 15.01.2024</code></pre>
+
+<h3>Translation Management</h3>
+<p>Options for managing translations:</p>
+<ul>
+    <li><strong>In-house</strong> - Editors translate in CMS</li>
+    <li><strong>Translation connectors</strong> - Integrate with TMS</li>
+    <li><strong>Export/Import</strong> - XLIFF files for agencies</li>
+</ul>
+
+<h3>Best Practices</h3>
+<ul>
+    <li>Plan for text expansion (German ~30% longer)</li>
+    <li>Avoid text in images</li>
+    <li>Use ICU message format for plurals</li>
+    <li>Test with actual content, not lorem ipsum</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "ms-domain-routing",
+                    ModuleId = "multi-site",
+                    Title = "Domain and URL Routing",
+                    Summary = "Configure domain routing and URL management for multi-site.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Configure domain routing in DXP",
+                        "Set up URL redirects",
+                        "Handle canonical URLs",
+                        "Implement URL rewriting"
+                    },
+                    Content = @"
+<h2>Domain and URL Routing</h2>
+<p>Proper domain and URL configuration is essential for <strong>SEO and user experience</strong> in multi-site setups.</p>
+
+<h3>Domain Configuration in DXP</h3>
+<p>Configure custom domains:</p>
+<ol>
+    <li>Add domain in DXP portal</li>
+    <li>Configure SSL certificate (automatic with Cloudflare)</li>
+    <li>Map domain to site in CMS</li>
+    <li>Update DNS to point to DXP</li>
+</ol>
+
+<h3>Site Hosts Configuration</h3>
+<pre><code>// In CMS Admin or via API
+var site = siteRepo.Get(siteId);
+site.Hosts = new List&lt;HostDefinition&gt;
+{
+    new HostDefinition
+    {
+        Name = ""www.brand-a.com"",
+        Type = HostDefinitionType.Primary,
+        Language = new CultureInfo(""en"")
+    },
+    new HostDefinition
+    {
+        Name = ""de.brand-a.com"",
+        Type = HostDefinitionType.Primary,
+        Language = new CultureInfo(""de"")
+    }
+};
+siteRepo.Save(site);</code></pre>
+
+<h3>URL Redirects</h3>
+<pre><code>// In middleware or web.config equivalent
+app.UseRewriter(new RewriteOptions()
+    .AddRedirect(""^old-page$"", ""new-page"", 301)
+    .AddRedirectToWww()
+    .AddRedirectToHttps());</code></pre>
+
+<h3>Canonical URLs</h3>
+<pre><code>// In _Layout.cshtml
+@{
+    var canonicalUrl = CanonicalUrl.GetCanonicalUrl(Model.CurrentPage);
+}
+&lt;link rel=""canonical"" href=""@canonicalUrl"" /&gt;</code></pre>
+
+<h3>URL Segments</h3>
+<pre><code>// Custom URL segment for pages
+[ContentType]
+public class ProductPage : PageData
+{
+    [Display(Name = ""URL Segment"")]
+    public override string URLSegment { get; set; }
+}</code></pre>
+
+<h3>Trailing Slashes</h3>
+<p>Choose a consistent approach:</p>
+<ul>
+    <li>With trailing slash: <code>/products/</code></li>
+    <li>Without: <code>/products</code></li>
+    <li>Redirect non-canonical to canonical</li>
+</ul>
+
+<h3>DXP-Specific Considerations</h3>
+<ul>
+    <li>CDN handles SSL termination</li>
+    <li>Configure redirects at CDN level when possible</li>
+    <li>Use permanent (301) redirects for SEO</li>
 </ul>
 "
                 }
