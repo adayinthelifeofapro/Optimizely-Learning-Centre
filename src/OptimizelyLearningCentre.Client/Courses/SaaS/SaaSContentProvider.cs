@@ -58,7 +58,12 @@ public class SaaSContentProvider : ILearningContentProvider
             BuildRestApiModule(),
             BuildGraphIntegrationModule(),
             BuildAccessRightsModule(),
-            BuildAdvancedTopicsModule()
+            BuildAdvancedTopicsModule(),
+            BuildWorkflowsPublishingModule(),
+            BuildLocalizationModule(),
+            BuildMediaManagementModule(),
+            BuildWebhooksEventsModule(),
+            BuildTroubleshootingModule()
         };
     }
 
@@ -2809,6 +2814,1908 @@ component data in a single query.",
     <li>Content API for content import</li>
     <li>Custom scripts for transformation</li>
 </ul>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 9: Workflows & Publishing
+
+    private LearningModule BuildWorkflowsPublishingModule()
+    {
+        return new LearningModule
+        {
+            Id = "workflows-publishing",
+            Title = "Workflows & Publishing",
+            Description = "Master content workflows, approval processes, scheduling, and publishing in Optimizely CMS (SaaS).",
+            Icon = "arrow-path",
+            Order = 9,
+            Difficulty = ModuleDifficulty.Intermediate,
+            Prerequisites = new[] { "getting-started", "content-modeling" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "wp-content-states",
+                    ModuleId = "workflows-publishing",
+                    Title = "Understanding Content States",
+                    Summary = "Learn about the different states content can be in and how transitions work.",
+                    Order = 1,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand the content lifecycle states",
+                        "Learn how content transitions between states",
+                        "Identify when content becomes visible to visitors"
+                    },
+                    Content = @"
+<h2>Content States in CMS (SaaS)</h2>
+<p>Content in Optimizely CMS (SaaS) moves through various states during its lifecycle. Understanding these states is crucial for managing content effectively.</p>
+
+<h3>Primary Content States</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">State</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+            <th class=""px-4 py-2 text-left"">Visible to Visitors</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2 font-medium"">Draft</td><td class=""px-4 py-2"">Work in progress, not yet ready for review</td><td class=""px-4 py-2"">No</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Ready for Review</td><td class=""px-4 py-2"">Content is complete and awaiting approval</td><td class=""px-4 py-2"">No</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Published</td><td class=""px-4 py-2"">Content is live and visible</td><td class=""px-4 py-2"">Yes</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Scheduled</td><td class=""px-4 py-2"">Approved but waiting for publish date</td><td class=""px-4 py-2"">No (until date)</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Expired</td><td class=""px-4 py-2"">Past its unpublish date</td><td class=""px-4 py-2"">No</td></tr>
+    </tbody>
+</table>
+
+<h3>State Transitions</h3>
+<p>Content moves through states based on user actions and system rules:</p>
+<ul>
+    <li><strong>Draft → Ready for Review</strong> - Author submits for approval</li>
+    <li><strong>Ready for Review → Published</strong> - Approver publishes content</li>
+    <li><strong>Ready for Review → Draft</strong> - Approver requests changes</li>
+    <li><strong>Published → Draft</strong> - Creating a new draft version</li>
+    <li><strong>Published → Expired</strong> - Unpublish date reached</li>
+</ul>
+
+<h3>Version Handling</h3>
+<p>When you edit published content, a new draft version is created while the published version remains visible. This allows you to:</p>
+<ul>
+    <li>Make changes without affecting the live site</li>
+    <li>Preview changes before publishing</li>
+    <li>Collaborate on updates safely</li>
+    <li>Roll back to previous versions if needed</li>
+</ul>
+
+<div class=""bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">💡 Key Insight</p>
+    <p>Content is only indexed in Optimizely Graph when it reaches the Published state. Draft and review content is not available for frontend queries.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "wp-approval-workflows",
+                    ModuleId = "workflows-publishing",
+                    Title = "Approval Workflows",
+                    Summary = "Configure and use approval workflows for content governance.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Set up approval workflows for content",
+                        "Understand single and multi-step approvals",
+                        "Configure notifications for workflow participants"
+                    },
+                    Content = @"
+<h2>Approval Workflows</h2>
+<p>Approval workflows ensure content quality and compliance by requiring review before publication. CMS (SaaS) supports flexible workflow configurations.</p>
+
+<h3>Workflow Types</h3>
+
+<h4>Simple Approval</h4>
+<p>A single approver reviews and publishes content:</p>
+<ol>
+    <li>Author creates content and marks as ""Ready for Review""</li>
+    <li>Approver receives notification</li>
+    <li>Approver reviews and either publishes or requests changes</li>
+</ol>
+
+<h4>Sequential Approval</h4>
+<p>Multiple approvers review in a specific order:</p>
+<ol>
+    <li>Author submits content</li>
+    <li>First approver (e.g., Editor) reviews</li>
+    <li>Second approver (e.g., Legal) reviews</li>
+    <li>Final approver (e.g., Publisher) publishes</li>
+</ol>
+
+<h3>Configuring Workflows</h3>
+<p>Workflows are configured based on:</p>
+<ul>
+    <li><strong>Content Type</strong> - Different types may require different workflows</li>
+    <li><strong>Content Location</strong> - Sections of the site may have unique requirements</li>
+    <li><strong>User Roles</strong> - Permissions determine who can approve</li>
+</ul>
+
+<h3>Workflow Notifications</h3>
+<p>Keep stakeholders informed with automatic notifications:</p>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Event</th>
+            <th class=""px-4 py-2 text-left"">Recipients</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Content submitted for review</td><td class=""px-4 py-2"">Assigned approvers</td></tr>
+        <tr><td class=""px-4 py-2"">Changes requested</td><td class=""px-4 py-2"">Content author</td></tr>
+        <tr><td class=""px-4 py-2"">Content approved</td><td class=""px-4 py-2"">Author, stakeholders</td></tr>
+        <tr><td class=""px-4 py-2"">Content published</td><td class=""px-4 py-2"">Author, stakeholders</td></tr>
+    </tbody>
+</table>
+
+<h3>Best Practices</h3>
+<ul>
+    <li>Keep workflows as simple as possible while meeting compliance needs</li>
+    <li>Define clear approval criteria for reviewers</li>
+    <li>Set reasonable SLAs for approval turnaround</li>
+    <li>Use role-based assignments rather than specific users</li>
+</ul>
+",
+                    Examples = new List<LessonExample>
+                    {
+                        new LessonExample
+                        {
+                            Id = "wp-workflow-config",
+                            Title = "Workflow Configuration Example",
+                            Description = "Example of a multi-step approval workflow configuration",
+                            Type = ExampleType.Configuration,
+                            ExampleContent = @"{
+  ""workflow"": {
+    ""name"": ""Marketing Content Approval"",
+    ""contentTypes"": [""MarketingPage"", ""BlogPost""],
+    ""steps"": [
+      {
+        ""name"": ""Editorial Review"",
+        ""approvers"": [""EditorRole""],
+        ""required"": true
+      },
+      {
+        ""name"": ""Legal Compliance"",
+        ""approvers"": [""LegalRole""],
+        ""required"": true,
+        ""conditions"": {
+          ""hasDisclaimer"": true
+        }
+      },
+      {
+        ""name"": ""Final Approval"",
+        ""approvers"": [""PublisherRole""],
+        ""required"": true
+      }
+    ]
+  }
+}",
+                            Hints = new List<string>
+                            {
+                                "Conditional steps only trigger when conditions are met",
+                                "Use role-based approvers for flexibility",
+                                "Mark critical steps as required"
+                            }
+                        }
+                    }
+                },
+                new Lesson
+                {
+                    Id = "wp-scheduling",
+                    ModuleId = "workflows-publishing",
+                    Title = "Scheduled Publishing",
+                    Summary = "Learn to schedule content for future publication and expiration.",
+                    Order = 3,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Schedule content for future publication",
+                        "Set content expiration dates",
+                        "Manage time-sensitive content campaigns"
+                    },
+                    Content = @"
+<h2>Scheduled Publishing</h2>
+<p>Scheduled publishing allows you to prepare content in advance and have it automatically go live at a specified time. This is essential for time-sensitive campaigns, announcements, and coordinated releases.</p>
+
+<h3>Setting a Publish Date</h3>
+<p>When publishing content, you can specify a future date and time:</p>
+<ol>
+    <li>Complete your content and mark it ready for review</li>
+    <li>During approval, select ""Schedule for later""</li>
+    <li>Choose the publish date and time</li>
+    <li>Select the appropriate timezone</li>
+    <li>Confirm the scheduled publication</li>
+</ol>
+
+<h3>Setting an Expiration Date</h3>
+<p>Content can also be set to automatically expire:</p>
+<ul>
+    <li><strong>Unpublish on date</strong> - Content is removed from the live site</li>
+    <li><strong>Archive on date</strong> - Content is moved to archive state</li>
+    <li><strong>Delete on date</strong> - Content is permanently removed (use with caution)</li>
+</ul>
+
+<h3>Common Use Cases</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Scenario</th>
+            <th class=""px-4 py-2 text-left"">Publish</th>
+            <th class=""px-4 py-2 text-left"">Expire</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Product launch</td><td class=""px-4 py-2"">Launch date/time</td><td class=""px-4 py-2"">Not set</td></tr>
+        <tr><td class=""px-4 py-2"">Holiday promotion</td><td class=""px-4 py-2"">Promotion start</td><td class=""px-4 py-2"">Promotion end</td></tr>
+        <tr><td class=""px-4 py-2"">Event registration</td><td class=""px-4 py-2"">Registration opens</td><td class=""px-4 py-2"">Event date</td></tr>
+        <tr><td class=""px-4 py-2"">Legal notice</td><td class=""px-4 py-2"">Effective date</td><td class=""px-4 py-2"">Superseded date</td></tr>
+    </tbody>
+</table>
+
+<h3>Timezone Considerations</h3>
+<div class=""bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">⚠️ Important</p>
+    <p>Always verify the timezone when scheduling content, especially for global campaigns. Content will publish based on the selected timezone, which may differ from your local time.</p>
+</div>
+
+<h3>Viewing Scheduled Content</h3>
+<p>The CMS UI provides views to manage scheduled content:</p>
+<ul>
+    <li><strong>Scheduled Queue</strong> - All content waiting to be published</li>
+    <li><strong>Expiring Soon</strong> - Content approaching expiration</li>
+    <li><strong>Calendar View</strong> - Visual timeline of scheduled activities</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "wp-versioning",
+                    ModuleId = "workflows-publishing",
+                    Title = "Version History & Rollback",
+                    Summary = "Manage content versions and restore previous states when needed.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Navigate and compare content versions",
+                        "Restore content to a previous version",
+                        "Understand version retention policies"
+                    },
+                    Content = @"
+<h2>Version History & Rollback</h2>
+<p>Every change to content creates a new version, providing a complete audit trail and the ability to restore previous states.</p>
+
+<h3>Viewing Version History</h3>
+<p>Access version history from any content item to see:</p>
+<ul>
+    <li><strong>Version number</strong> - Sequential identifier</li>
+    <li><strong>Date/time</strong> - When the version was created</li>
+    <li><strong>Author</strong> - Who made the changes</li>
+    <li><strong>Status</strong> - Draft, Published, etc.</li>
+    <li><strong>Change summary</strong> - Notes about what changed</li>
+</ul>
+
+<h3>Comparing Versions</h3>
+<p>The comparison tool helps you understand what changed:</p>
+<ul>
+    <li><strong>Side-by-side view</strong> - See two versions simultaneously</li>
+    <li><strong>Diff highlighting</strong> - Added, removed, and modified content</li>
+    <li><strong>Property-level comparison</strong> - Compare specific fields</li>
+</ul>
+
+<h3>Restoring a Previous Version</h3>
+<p>To restore content to a previous state:</p>
+<ol>
+    <li>Open the content item's version history</li>
+    <li>Select the version you want to restore</li>
+    <li>Click ""Restore this version""</li>
+    <li>A new draft is created with the old content</li>
+    <li>Review and publish the restored version</li>
+</ol>
+
+<div class=""bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">💡 Key Insight</p>
+    <p>Restoring a version doesn't delete other versions. It creates a new version with the content from the selected historical version, preserving the complete audit trail.</p>
+</div>
+
+<h3>Version Retention</h3>
+<p>Version retention policies help manage storage:</p>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Policy</th>
+            <th class=""px-4 py-2 text-left"">Behavior</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Keep all versions</td><td class=""px-4 py-2"">Complete history retained indefinitely</td></tr>
+        <tr><td class=""px-4 py-2"">Keep N versions</td><td class=""px-4 py-2"">Oldest versions removed when limit exceeded</td></tr>
+        <tr><td class=""px-4 py-2"">Keep for N days</td><td class=""px-4 py-2"">Versions older than threshold removed</td></tr>
+        <tr><td class=""px-4 py-2"">Keep published only</td><td class=""px-4 py-2"">Only published versions retained long-term</td></tr>
+    </tbody>
+</table>
+
+<h3>Best Practices</h3>
+<ul>
+    <li>Add meaningful change notes when saving versions</li>
+    <li>Review versions before major updates</li>
+    <li>Use compare feature before restoring</li>
+    <li>Set appropriate retention policies for your compliance needs</li>
+</ul>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 10: Localization & Multi-Language
+
+    private LearningModule BuildLocalizationModule()
+    {
+        return new LearningModule
+        {
+            Id = "localization",
+            Title = "Localization & Multi-Language",
+            Description = "Implement multi-language content strategies with localization features in CMS (SaaS).",
+            Icon = "language",
+            Order = 10,
+            Difficulty = ModuleDifficulty.Intermediate,
+            Prerequisites = new[] { "content-modeling", "visual-builder-essentials" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "loc-language-setup",
+                    ModuleId = "localization",
+                    Title = "Language Configuration",
+                    Summary = "Set up and configure languages for your multi-language site.",
+                    Order = 1,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Configure available languages in CMS (SaaS)",
+                        "Set master and fallback languages",
+                        "Understand language branch structure"
+                    },
+                    Content = @"
+<h2>Language Configuration</h2>
+<p>CMS (SaaS) provides robust multi-language support, allowing you to manage content in multiple languages from a single platform.</p>
+
+<h3>Adding Languages</h3>
+<p>To add a new language to your CMS instance:</p>
+<ol>
+    <li>Navigate to Admin > Languages</li>
+    <li>Click ""Add Language""</li>
+    <li>Select from available language codes (e.g., en-US, fr-FR, de-DE)</li>
+    <li>Configure language settings</li>
+    <li>Enable the language for content creation</li>
+</ol>
+
+<h3>Language Settings</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Setting</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2 font-medium"">Language Code</td><td class=""px-4 py-2"">ISO language-region code (e.g., en-US)</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Display Name</td><td class=""px-4 py-2"">Human-readable name in the UI</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Master Language</td><td class=""px-4 py-2"">The primary/default language</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Fallback Language</td><td class=""px-4 py-2"">Language to use when translation is missing</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Enabled</td><td class=""px-4 py-2"">Whether editors can create content</td></tr>
+    </tbody>
+</table>
+
+<h3>Language Branch Structure</h3>
+<p>Content exists in language branches:</p>
+<ul>
+    <li>Each content item can have multiple language versions</li>
+    <li>Language versions share the same content ID but different language codes</li>
+    <li>You can publish languages independently</li>
+    <li>Not all content needs to exist in all languages</li>
+</ul>
+
+<h3>Fallback Languages</h3>
+<p>Configure fallback chains for when translations don't exist:</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>Example Fallback Chain:
+fr-CA (French Canadian)
+  ↓ falls back to
+fr-FR (French France)
+  ↓ falls back to
+en-US (English US - Master)</code></pre>
+
+<div class=""bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">💡 Key Insight</p>
+    <p>Fallback behavior can be configured per property type. Some properties (like images) may always use fallback, while text properties might require explicit translation.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "loc-translating-content",
+                    ModuleId = "localization",
+                    Title = "Translating Content",
+                    Summary = "Learn efficient workflows for translating content between languages.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Create content translations efficiently",
+                        "Use the translation comparison view",
+                        "Manage translation workflows"
+                    },
+                    Content = @"
+<h2>Translating Content</h2>
+<p>Efficient translation workflows are essential for maintaining multi-language sites. CMS (SaaS) provides tools to streamline the translation process.</p>
+
+<h3>Creating Translations</h3>
+<p>To translate existing content:</p>
+<ol>
+    <li>Open the content item in the master language</li>
+    <li>Select the target language from the language selector</li>
+    <li>Click ""Create Translation"" (or content will auto-create in draft)</li>
+    <li>Translate the content fields</li>
+    <li>Submit for review and publish</li>
+</ol>
+
+<h3>Translation Comparison View</h3>
+<p>The side-by-side view helps translators work efficiently:</p>
+<ul>
+    <li><strong>Source language</strong> on the left (read-only)</li>
+    <li><strong>Target language</strong> on the right (editable)</li>
+    <li><strong>Property highlighting</strong> shows untranslated fields</li>
+    <li><strong>Character counts</strong> help manage length constraints</li>
+</ul>
+
+<h3>Translation Status Indicators</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Status</th>
+            <th class=""px-4 py-2 text-left"">Meaning</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">🟢 Translated</td><td class=""px-4 py-2"">Content fully translated and published</td></tr>
+        <tr><td class=""px-4 py-2"">🟡 Partial</td><td class=""px-4 py-2"">Some fields translated, others using fallback</td></tr>
+        <tr><td class=""px-4 py-2"">🔴 Missing</td><td class=""px-4 py-2"">No translation exists</td></tr>
+        <tr><td class=""px-4 py-2"">🔵 Outdated</td><td class=""px-4 py-2"">Master updated since translation</td></tr>
+    </tbody>
+</table>
+
+<h3>Bulk Translation Tools</h3>
+<p>For large-scale translation projects:</p>
+<ul>
+    <li><strong>Export for translation</strong> - Generate XLIFF files for external translators</li>
+    <li><strong>Import translations</strong> - Import completed XLIFF files</li>
+    <li><strong>Translation reports</strong> - Track translation coverage</li>
+</ul>
+
+<h3>Translation Workflows</h3>
+<p>Configure separate workflows for translations:</p>
+<ul>
+    <li>Native speaker review step</li>
+    <li>Cultural adaptation review</li>
+    <li>Legal compliance check for specific markets</li>
+    <li>Final publication approval</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "loc-querying-languages",
+                    ModuleId = "localization",
+                    Title = "Querying Multi-Language Content",
+                    Summary = "Retrieve localized content through Optimizely Graph.",
+                    Order = 3,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Query content in specific languages",
+                        "Handle fallback behavior in queries",
+                        "Build language-aware frontends"
+                    },
+                    Content = @"
+<h2>Querying Multi-Language Content</h2>
+<p>Optimizely Graph provides powerful capabilities for retrieving content in the correct language for your users.</p>
+
+<h3>Language Parameter</h3>
+<p>The <code>locale</code> parameter specifies which language to retrieve:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query GetPageContent {
+  ArticlePage(
+    locale: fr_FR
+    where: { _metadata: { url: { default: { eq: ""/about"" } } } }
+  ) {
+    items {
+      title
+      summary
+      content
+    }
+  }
+}</code></pre>
+
+<h3>Multiple Languages in One Query</h3>
+<p>Retrieve content in multiple languages simultaneously:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query GetPageInMultipleLanguages {
+  english: ArticlePage(locale: en_US, limit: 1) {
+    items { title }
+  }
+  french: ArticlePage(locale: fr_FR, limit: 1) {
+    items { title }
+  }
+  german: ArticlePage(locale: de_DE, limit: 1) {
+    items { title }
+  }
+}</code></pre>
+
+<h3>Fallback Behavior</h3>
+<p>Graph respects the fallback chain configured in the CMS. If content doesn't exist in the requested language, the fallback language is returned.</p>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">⚠️ Important</p>
+    <p>Check the <code>_metadata.language</code> field in responses to know which language was actually returned (it may be a fallback).</p>
+</div>
+
+<h3>Language-Specific Filtering</h3>
+<p>Filter to only return content that exists in a specific language (no fallback):</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query GetFrenchOnlyContent {
+  ArticlePage(
+    locale: fr_FR
+    where: { _metadata: { language: { name: { eq: ""fr-FR"" } } } }
+  ) {
+    items {
+      title
+      _metadata {
+        language { name }
+      }
+    }
+  }
+}</code></pre>
+
+<h3>Building Language-Aware Frontends</h3>
+<ul>
+    <li>Detect user language from browser/settings</li>
+    <li>Pass locale parameter to all Graph queries</li>
+    <li>Provide language switcher UI</li>
+    <li>Handle missing translations gracefully</li>
+    <li>Consider SEO implications (hreflang tags)</li>
+</ul>
+",
+                    Examples = new List<LessonExample>
+                    {
+                        new LessonExample
+                        {
+                            Id = "loc-query-locale",
+                            Title = "Querying with Locale",
+                            Description = "Example of querying content in a specific language with metadata",
+                            Type = ExampleType.Query,
+                            ExampleContent = @"query GetLocalizedPage($url: String!, $locale: Locales!) {
+  ArticlePage(
+    locale: [$locale]
+    where: { _metadata: { url: { default: { eq: $url } } } }
+  ) {
+    items {
+      title
+      summary
+      content
+      _metadata {
+        language {
+          name
+          displayName
+        }
+        published
+      }
+    }
+  }
+}",
+                            SampleResponse = @"{
+  ""data"": {
+    ""ArticlePage"": {
+      ""items"": [
+        {
+          ""title"": ""À propos de nous"",
+          ""summary"": ""Découvrez notre entreprise..."",
+          ""content"": ""<p>Bienvenue...</p>"",
+          ""_metadata"": {
+            ""language"": {
+              ""name"": ""fr-FR"",
+              ""displayName"": ""French (France)""
+            },
+            ""published"": ""2024-01-15T10:30:00Z""
+          }
+        }
+      ]
+    }
+  }
+}",
+                            Hints = new List<string>
+                            {
+                                "Always check _metadata.language to confirm the returned language",
+                                "Use variables for locale to support dynamic language switching",
+                                "Consider caching strategies per language"
+                            }
+                        }
+                    }
+                },
+                new Lesson
+                {
+                    Id = "loc-best-practices",
+                    ModuleId = "localization",
+                    Title = "Localization Best Practices",
+                    Summary = "Learn strategies for successful multi-language content management.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Design content models for localization",
+                        "Establish translation governance",
+                        "Optimize the translation workflow"
+                    },
+                    Content = @"
+<h2>Localization Best Practices</h2>
+<p>Successful multi-language implementations require planning and consistent practices. These guidelines will help you build scalable localized experiences.</p>
+
+<h3>Content Model Design</h3>
+<ul>
+    <li><strong>Identify translatable properties</strong> - Not everything needs translation (IDs, codes, etc.)</li>
+    <li><strong>Use shared assets wisely</strong> - Images may or may not need localization</li>
+    <li><strong>Consider text expansion</strong> - German text is often 30% longer than English</li>
+    <li><strong>Design flexible layouts</strong> - Accommodate varying content lengths</li>
+</ul>
+
+<h3>Translation Governance</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Practice</th>
+            <th class=""px-4 py-2 text-left"">Recommendation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Translation memory</td><td class=""px-4 py-2"">Maintain glossaries for consistent terminology</td></tr>
+        <tr><td class=""px-4 py-2"">Style guides</td><td class=""px-4 py-2"">Create per-language style guidelines</td></tr>
+        <tr><td class=""px-4 py-2"">Review process</td><td class=""px-4 py-2"">Include native speakers in review</td></tr>
+        <tr><td class=""px-4 py-2"">Update tracking</td><td class=""px-4 py-2"">Flag outdated translations for review</td></tr>
+    </tbody>
+</table>
+
+<h3>URL Strategy</h3>
+<p>Choose a URL strategy for your multi-language site:</p>
+<ul>
+    <li><strong>Subdirectory</strong>: example.com/fr/, example.com/de/ (recommended)</li>
+    <li><strong>Subdomain</strong>: fr.example.com, de.example.com</li>
+    <li><strong>Separate domains</strong>: example.fr, example.de</li>
+</ul>
+
+<h3>SEO Considerations</h3>
+<ul>
+    <li>Implement hreflang tags for language alternates</li>
+    <li>Create language-specific sitemaps</li>
+    <li>Translate meta descriptions and titles</li>
+    <li>Consider local keyword research</li>
+</ul>
+
+<h3>Performance Optimization</h3>
+<ul>
+    <li>Cache content per language</li>
+    <li>Use CDN with geographic optimization</li>
+    <li>Minimize fallback requests</li>
+    <li>Preload likely language switches</li>
+</ul>
+
+<div class=""bg-green-50 dark:bg-green-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">✅ Success Tip</p>
+    <p>Start with your most important markets and expand gradually. It's better to have high-quality translations for key languages than poor translations for many.</p>
+</div>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 11: Media Management
+
+    private LearningModule BuildMediaManagementModule()
+    {
+        return new LearningModule
+        {
+            Id = "media-management",
+            Title = "Media Management",
+            Description = "Manage images, documents, and other media assets effectively in CMS (SaaS).",
+            Icon = "photo",
+            Order = 11,
+            Difficulty = ModuleDifficulty.Beginner,
+            Prerequisites = new[] { "getting-started" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "mm-media-library",
+                    ModuleId = "media-management",
+                    Title = "Media Library Overview",
+                    Summary = "Navigate and use the media library to manage digital assets.",
+                    Order = 1,
+                    EstimatedMinutes = 8,
+                    LearningObjectives = new List<string>
+                    {
+                        "Navigate the media library interface",
+                        "Upload and organize media files",
+                        "Search and filter media assets"
+                    },
+                    Content = @"
+<h2>Media Library Overview</h2>
+<p>The Media Library is your central hub for managing all digital assets including images, videos, documents, and other files used across your content.</p>
+
+<h3>Accessing the Media Library</h3>
+<p>The media library can be accessed from:</p>
+<ul>
+    <li>Main navigation > Assets > Media</li>
+    <li>Any media property picker in content editing</li>
+    <li>Visual Builder asset panels</li>
+</ul>
+
+<h3>Uploading Media</h3>
+<p>Several ways to upload files:</p>
+<ul>
+    <li><strong>Drag and drop</strong> - Drop files directly into the library</li>
+    <li><strong>Upload button</strong> - Browse and select files</li>
+    <li><strong>Bulk upload</strong> - Upload multiple files simultaneously</li>
+    <li><strong>REST API</strong> - Programmatic uploads</li>
+</ul>
+
+<h3>Supported File Types</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Category</th>
+            <th class=""px-4 py-2 text-left"">Formats</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Images</td><td class=""px-4 py-2"">JPG, PNG, GIF, WebP, SVG</td></tr>
+        <tr><td class=""px-4 py-2"">Videos</td><td class=""px-4 py-2"">MP4, WebM, MOV</td></tr>
+        <tr><td class=""px-4 py-2"">Documents</td><td class=""px-4 py-2"">PDF, DOCX, XLSX, PPTX</td></tr>
+        <tr><td class=""px-4 py-2"">Other</td><td class=""px-4 py-2"">ZIP, JSON, XML</td></tr>
+    </tbody>
+</table>
+
+<h3>Organizing Media</h3>
+<p>Keep your media organized with:</p>
+<ul>
+    <li><strong>Folders</strong> - Create hierarchical folder structures</li>
+    <li><strong>Tags</strong> - Apply multiple tags for cross-cutting organization</li>
+    <li><strong>Metadata</strong> - Add descriptions, alt text, and custom properties</li>
+</ul>
+
+<h3>Search and Filter</h3>
+<p>Find assets quickly using:</p>
+<ul>
+    <li>Full-text search on file names and metadata</li>
+    <li>Filter by file type, date, size</li>
+    <li>Filter by tags and folders</li>
+    <li>Sort by date, name, or size</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "mm-image-optimization",
+                    ModuleId = "media-management",
+                    Title = "Image Optimization",
+                    Summary = "Learn how images are automatically optimized for web delivery.",
+                    Order = 2,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand automatic image optimization",
+                        "Configure image transformation parameters",
+                        "Implement responsive images"
+                    },
+                    Content = @"
+<h2>Image Optimization</h2>
+<p>CMS (SaaS) automatically optimizes images for web delivery, reducing file sizes while maintaining visual quality.</p>
+
+<h3>Automatic Optimization</h3>
+<p>When images are served through Graph, they are automatically:</p>
+<ul>
+    <li><strong>Compressed</strong> - Reduced file size without visible quality loss</li>
+    <li><strong>Format converted</strong> - Served as WebP where supported</li>
+    <li><strong>Cached</strong> - Delivered through CDN for fast loading</li>
+</ul>
+
+<h3>Image Transformation Parameters</h3>
+<p>Add URL parameters to transform images on-the-fly:</p>
+
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Parameter</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+            <th class=""px-4 py-2 text-left"">Example</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>width</code></td><td class=""px-4 py-2"">Resize to width (px)</td><td class=""px-4 py-2""><code>?width=800</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>height</code></td><td class=""px-4 py-2"">Resize to height (px)</td><td class=""px-4 py-2""><code>?height=600</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>quality</code></td><td class=""px-4 py-2"">Compression quality (1-100)</td><td class=""px-4 py-2""><code>?quality=80</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>format</code></td><td class=""px-4 py-2"">Output format</td><td class=""px-4 py-2""><code>?format=webp</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>fit</code></td><td class=""px-4 py-2"">Resize mode</td><td class=""px-4 py-2""><code>?fit=crop</code></td></tr>
+    </tbody>
+</table>
+
+<h3>Fit Modes</h3>
+<ul>
+    <li><strong>contain</strong> - Fit within dimensions, maintain aspect ratio</li>
+    <li><strong>cover</strong> - Fill dimensions, crop excess</li>
+    <li><strong>crop</strong> - Crop to exact dimensions</li>
+    <li><strong>scale-down</strong> - Only shrink, never enlarge</li>
+</ul>
+
+<h3>Responsive Images Example</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>&lt;img
+  srcset=""
+    /image.jpg?width=400 400w,
+    /image.jpg?width=800 800w,
+    /image.jpg?width=1200 1200w
+  ""
+  sizes=""(max-width: 600px) 400px,
+         (max-width: 1000px) 800px,
+         1200px""
+  src=""/image.jpg?width=800""
+  alt=""Responsive image""
+/&gt;</code></pre>
+
+<div class=""bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">💡 Key Insight</p>
+    <p>Transformed images are cached at the CDN edge. The first request generates the transformation; subsequent requests are served from cache.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "mm-metadata-alt-text",
+                    ModuleId = "media-management",
+                    Title = "Metadata and Accessibility",
+                    Summary = "Add metadata and alt text for better SEO and accessibility.",
+                    Order = 3,
+                    EstimatedMinutes = 8,
+                    LearningObjectives = new List<string>
+                    {
+                        "Add and manage media metadata",
+                        "Write effective alt text for accessibility",
+                        "Understand metadata impact on SEO"
+                    },
+                    Content = @"
+<h2>Metadata and Accessibility</h2>
+<p>Proper metadata improves searchability, SEO, and accessibility. Every media asset should have appropriate metadata.</p>
+
+<h3>Core Metadata Fields</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Field</th>
+            <th class=""px-4 py-2 text-left"">Purpose</th>
+            <th class=""px-4 py-2 text-left"">Required</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Title</td><td class=""px-4 py-2"">Human-readable name</td><td class=""px-4 py-2"">Recommended</td></tr>
+        <tr><td class=""px-4 py-2"">Alt Text</td><td class=""px-4 py-2"">Screen reader description</td><td class=""px-4 py-2"">Required (images)</td></tr>
+        <tr><td class=""px-4 py-2"">Description</td><td class=""px-4 py-2"">Detailed description</td><td class=""px-4 py-2"">Optional</td></tr>
+        <tr><td class=""px-4 py-2"">Copyright</td><td class=""px-4 py-2"">Rights information</td><td class=""px-4 py-2"">Recommended</td></tr>
+        <tr><td class=""px-4 py-2"">Tags</td><td class=""px-4 py-2"">Categorization keywords</td><td class=""px-4 py-2"">Recommended</td></tr>
+    </tbody>
+</table>
+
+<h3>Writing Effective Alt Text</h3>
+<p>Alt text is critical for accessibility. Follow these guidelines:</p>
+
+<h4>Do:</h4>
+<ul>
+    <li>Describe what the image shows, not what it is</li>
+    <li>Keep it concise (under 125 characters)</li>
+    <li>Include relevant context</li>
+    <li>Describe text within images</li>
+</ul>
+
+<h4>Don't:</h4>
+<ul>
+    <li>Start with ""Image of..."" or ""Picture of...""</li>
+    <li>Repeat information already in surrounding text</li>
+    <li>Use file names as alt text</li>
+    <li>Leave decorative images with alt text (use empty alt)</li>
+</ul>
+
+<h3>Examples</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Image</th>
+            <th class=""px-4 py-2 text-left"">❌ Poor Alt Text</th>
+            <th class=""px-4 py-2 text-left"">✅ Good Alt Text</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Team photo</td><td class=""px-4 py-2"">""team.jpg""</td><td class=""px-4 py-2"">""Marketing team celebrating product launch""</td></tr>
+        <tr><td class=""px-4 py-2"">Product shot</td><td class=""px-4 py-2"">""Image of product""</td><td class=""px-4 py-2"">""Blue wireless headphones with noise cancellation""</td></tr>
+        <tr><td class=""px-4 py-2"">Chart</td><td class=""px-4 py-2"">""Chart""</td><td class=""px-4 py-2"">""Bar chart showing 40% increase in Q4 sales""</td></tr>
+    </tbody>
+</table>
+
+<h3>SEO Impact</h3>
+<ul>
+    <li>Alt text helps search engines understand images</li>
+    <li>Descriptive file names improve discoverability</li>
+    <li>Metadata appears in image search results</li>
+    <li>Properly tagged images rank higher</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "mm-using-media-content",
+                    ModuleId = "media-management",
+                    Title = "Using Media in Content",
+                    Summary = "Insert and manage media within your content and Visual Builder.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Insert media into content properties",
+                        "Use media in Visual Builder elements",
+                        "Query media through Optimizely Graph"
+                    },
+                    Content = @"
+<h2>Using Media in Content</h2>
+<p>Media assets are referenced within your content through property pickers and can be queried alongside content through Optimizely Graph.</p>
+
+<h3>Media Property Types</h3>
+<p>Content models can include media properties:</p>
+<ul>
+    <li><strong>ContentReference (Image)</strong> - Single image reference</li>
+    <li><strong>ContentReference (Media)</strong> - Any media type</li>
+    <li><strong>ContentArea</strong> - Multiple media items</li>
+    <li><strong>URL</strong> - Direct URL to external media</li>
+</ul>
+
+<h3>Inserting Media in Edit Mode</h3>
+<ol>
+    <li>Click the media picker button on the property</li>
+    <li>Browse or search the media library</li>
+    <li>Select the desired asset</li>
+    <li>Confirm selection</li>
+</ol>
+
+<h3>Media in Visual Builder</h3>
+<p>Visual Builder provides rich media handling:</p>
+<ul>
+    <li><strong>Image elements</strong> - Dedicated image blocks with sizing options</li>
+    <li><strong>Background images</strong> - Apply images to sections/elements</li>
+    <li><strong>Video elements</strong> - Embedded video players</li>
+    <li><strong>Gallery elements</strong> - Multiple image displays</li>
+</ul>
+
+<h3>Querying Media via Graph</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query GetPageWithMedia {
+  ArticlePage {
+    items {
+      title
+      heroImage {
+        url
+        altText: _metadata { displayName }
+      }
+      galleryImages {
+        items {
+          url
+          _metadata {
+            displayName
+            mimeType
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+
+<h3>Image Focal Points</h3>
+<p>Set focal points to ensure important parts of images aren't cropped:</p>
+<ol>
+    <li>Open the image in the media library</li>
+    <li>Click ""Set focal point""</li>
+    <li>Click on the most important part of the image</li>
+    <li>Save the focal point</li>
+</ol>
+
+<div class=""bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">💡 Key Insight</p>
+    <p>Focal points are respected when images are cropped automatically for different display sizes, ensuring faces or key elements remain visible.</p>
+</div>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 12: Webhooks & Events
+
+    private LearningModule BuildWebhooksEventsModule()
+    {
+        return new LearningModule
+        {
+            Id = "webhooks-events",
+            Title = "Webhooks & Events",
+            Description = "Implement event-driven integrations using webhooks in CMS (SaaS).",
+            Icon = "bolt",
+            Order = 12,
+            Difficulty = ModuleDifficulty.Advanced,
+            Prerequisites = new[] { "rest-api" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "we-intro-webhooks",
+                    ModuleId = "webhooks-events",
+                    Title = "Introduction to Webhooks",
+                    Summary = "Understand webhooks and event-driven architecture in CMS (SaaS).",
+                    Order = 1,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand what webhooks are and how they work",
+                        "Identify use cases for event-driven integrations",
+                        "Learn the webhook event model"
+                    },
+                    Content = @"
+<h2>Introduction to Webhooks</h2>
+<p>Webhooks enable real-time integrations by sending HTTP notifications when events occur in CMS (SaaS). Instead of polling for changes, your systems receive instant updates.</p>
+
+<h3>What Are Webhooks?</h3>
+<p>A webhook is an HTTP callback that:</p>
+<ul>
+    <li>Triggers automatically when events occur</li>
+    <li>Sends a POST request to your specified URL</li>
+    <li>Contains event details in the request body</li>
+    <li>Enables real-time system integration</li>
+</ul>
+
+<h3>Webhooks vs. Polling</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Aspect</th>
+            <th class=""px-4 py-2 text-left"">Webhooks</th>
+            <th class=""px-4 py-2 text-left"">Polling</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Timing</td><td class=""px-4 py-2"">Real-time</td><td class=""px-4 py-2"">Delayed (polling interval)</td></tr>
+        <tr><td class=""px-4 py-2"">Efficiency</td><td class=""px-4 py-2"">Only when events occur</td><td class=""px-4 py-2"">Constant requests</td></tr>
+        <tr><td class=""px-4 py-2"">Complexity</td><td class=""px-4 py-2"">Requires endpoint setup</td><td class=""px-4 py-2"">Simple implementation</td></tr>
+        <tr><td class=""px-4 py-2"">Scalability</td><td class=""px-4 py-2"">Highly scalable</td><td class=""px-4 py-2"">Limited by rate limits</td></tr>
+    </tbody>
+</table>
+
+<h3>Common Use Cases</h3>
+<ul>
+    <li><strong>Cache invalidation</strong> - Clear frontend cache when content updates</li>
+    <li><strong>Search indexing</strong> - Update external search engines</li>
+    <li><strong>Notifications</strong> - Alert teams of content changes</li>
+    <li><strong>Workflow triggers</strong> - Start external processes</li>
+    <li><strong>Analytics</strong> - Track content operations</li>
+    <li><strong>Backup/sync</strong> - Replicate content to other systems</li>
+</ul>
+
+<h3>Available Event Types</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Event</th>
+            <th class=""px-4 py-2 text-left"">Triggered When</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>content.published</code></td><td class=""px-4 py-2"">Content is published</td></tr>
+        <tr><td class=""px-4 py-2""><code>content.unpublished</code></td><td class=""px-4 py-2"">Content is unpublished</td></tr>
+        <tr><td class=""px-4 py-2""><code>content.deleted</code></td><td class=""px-4 py-2"">Content is deleted</td></tr>
+        <tr><td class=""px-4 py-2""><code>content.moved</code></td><td class=""px-4 py-2"">Content location changes</td></tr>
+        <tr><td class=""px-4 py-2""><code>contentType.created</code></td><td class=""px-4 py-2"">New content type defined</td></tr>
+        <tr><td class=""px-4 py-2""><code>contentType.updated</code></td><td class=""px-4 py-2"">Content type modified</td></tr>
+    </tbody>
+</table>
+"
+                },
+                new Lesson
+                {
+                    Id = "we-configuring-webhooks",
+                    ModuleId = "webhooks-events",
+                    Title = "Configuring Webhooks",
+                    Summary = "Set up and configure webhooks for your CMS instance.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Create webhook configurations",
+                        "Configure event filters and conditions",
+                        "Set up webhook security"
+                    },
+                    Content = @"
+<h2>Configuring Webhooks</h2>
+<p>Webhook configuration defines which events trigger notifications and where they're sent.</p>
+
+<h3>Creating a Webhook</h3>
+<p>Configure webhooks via the Admin UI or REST API:</p>
+<ol>
+    <li>Navigate to Admin > Webhooks</li>
+    <li>Click ""Add Webhook""</li>
+    <li>Configure the webhook settings</li>
+    <li>Enable the webhook</li>
+    <li>Test the configuration</li>
+</ol>
+
+<h3>Webhook Configuration Options</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Setting</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2 font-medium"">Name</td><td class=""px-4 py-2"">Descriptive name for the webhook</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">URL</td><td class=""px-4 py-2"">Endpoint to receive webhook calls</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Events</td><td class=""px-4 py-2"">Which events trigger the webhook</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Content Types</td><td class=""px-4 py-2"">Filter to specific content types</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Secret</td><td class=""px-4 py-2"">Shared secret for signature verification</td></tr>
+        <tr><td class=""px-4 py-2 font-medium"">Enabled</td><td class=""px-4 py-2"">Active/inactive status</td></tr>
+    </tbody>
+</table>
+
+<h3>Event Filtering</h3>
+<p>Filter webhooks to only trigger for specific scenarios:</p>
+<ul>
+    <li><strong>By content type</strong> - Only ArticlePage publishes</li>
+    <li><strong>By event type</strong> - Only publish events</li>
+    <li><strong>By content location</strong> - Only content under /news/</li>
+</ul>
+
+<h3>Security Configuration</h3>
+<p>Secure your webhooks:</p>
+<ul>
+    <li><strong>HTTPS required</strong> - Use only secure endpoints</li>
+    <li><strong>Signature verification</strong> - Validate request authenticity</li>
+    <li><strong>IP allowlisting</strong> - Restrict to known CMS IPs</li>
+</ul>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">⚠️ Important</p>
+    <p>Always verify webhook signatures to ensure requests genuinely come from CMS (SaaS) and haven't been tampered with.</p>
+</div>
+",
+                    Examples = new List<LessonExample>
+                    {
+                        new LessonExample
+                        {
+                            Id = "we-config-example",
+                            Title = "Webhook Configuration via API",
+                            Description = "Create a webhook configuration using the REST API",
+                            Type = ExampleType.Code,
+                            ExampleContent = @"POST /api/v1/webhooks
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
+  ""name"": ""Cache Invalidation Webhook"",
+  ""url"": ""https://api.mysite.com/webhooks/cache-invalidate"",
+  ""events"": [
+    ""content.published"",
+    ""content.unpublished"",
+    ""content.deleted""
+  ],
+  ""contentTypes"": [
+    ""ArticlePage"",
+    ""ProductPage"",
+    ""LandingPage""
+  ],
+  ""secret"": ""your-webhook-secret-here"",
+  ""enabled"": true,
+  ""headers"": {
+    ""X-Custom-Header"": ""custom-value""
+  }
+}",
+                            SampleResponse = @"{
+  ""id"": ""wh_abc123def456"",
+  ""name"": ""Cache Invalidation Webhook"",
+  ""url"": ""https://api.mysite.com/webhooks/cache-invalidate"",
+  ""events"": [""content.published"", ""content.unpublished"", ""content.deleted""],
+  ""enabled"": true,
+  ""createdAt"": ""2024-01-15T10:30:00Z""
+}",
+                            Hints = new List<string>
+                            {
+                                "Store the webhook secret securely - you'll need it for signature verification",
+                                "Use content type filters to reduce unnecessary webhook calls",
+                                "Test webhooks in a staging environment first"
+                            }
+                        }
+                    }
+                },
+                new Lesson
+                {
+                    Id = "we-handling-webhooks",
+                    ModuleId = "webhooks-events",
+                    Title = "Handling Webhook Events",
+                    Summary = "Build reliable webhook receivers that process events correctly.",
+                    Order = 3,
+                    EstimatedMinutes = 15,
+                    LearningObjectives = new List<string>
+                    {
+                        "Build webhook receiver endpoints",
+                        "Verify webhook signatures",
+                        "Handle events reliably"
+                    },
+                    Content = @"
+<h2>Handling Webhook Events</h2>
+<p>Building a reliable webhook receiver requires proper validation, processing, and error handling.</p>
+
+<h3>Webhook Payload Structure</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+  ""id"": ""evt_abc123"",
+  ""type"": ""content.published"",
+  ""timestamp"": ""2024-01-15T10:30:00Z"",
+  ""data"": {
+    ""contentId"": ""12345"",
+    ""contentType"": ""ArticlePage"",
+    ""language"": ""en-US"",
+    ""url"": ""/articles/new-article"",
+    ""version"": 5
+  }
+}</code></pre>
+
+<h3>Signature Verification</h3>
+<p>Verify that webhooks are from CMS (SaaS):</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// The signature is sent in the X-Webhook-Signature header
+// Compute HMAC-SHA256 of the raw body using your secret
+// Compare with the provided signature
+
+const crypto = require('crypto');
+
+function verifySignature(payload, signature, secret) {
+  const computed = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(computed)
+  );
+}</code></pre>
+
+<h3>Best Practices</h3>
+<ul>
+    <li><strong>Respond quickly</strong> - Return 200 within 5 seconds, process async</li>
+    <li><strong>Idempotent handling</strong> - Same event may be delivered multiple times</li>
+    <li><strong>Queue processing</strong> - Use a message queue for reliability</li>
+    <li><strong>Log everything</strong> - Track all webhook activity</li>
+    <li><strong>Handle failures gracefully</strong> - Don't crash on bad data</li>
+</ul>
+
+<h3>Retry Behavior</h3>
+<p>CMS (SaaS) retries failed webhooks:</p>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Attempt</th>
+            <th class=""px-4 py-2 text-left"">Delay</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">1st retry</td><td class=""px-4 py-2"">1 minute</td></tr>
+        <tr><td class=""px-4 py-2"">2nd retry</td><td class=""px-4 py-2"">5 minutes</td></tr>
+        <tr><td class=""px-4 py-2"">3rd retry</td><td class=""px-4 py-2"">30 minutes</td></tr>
+        <tr><td class=""px-4 py-2"">4th retry</td><td class=""px-4 py-2"">2 hours</td></tr>
+        <tr><td class=""px-4 py-2"">5th retry</td><td class=""px-4 py-2"">24 hours</td></tr>
+    </tbody>
+</table>
+
+<div class=""bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">💡 Key Insight</p>
+    <p>Return a 2xx status code to acknowledge receipt, even if you'll process the event asynchronously. Non-2xx responses trigger retries.</p>
+</div>
+",
+                    Examples = new List<LessonExample>
+                    {
+                        new LessonExample
+                        {
+                            Id = "we-handler-example",
+                            Title = "Webhook Handler (Node.js)",
+                            Description = "Complete webhook handler with signature verification",
+                            Type = ExampleType.Code,
+                            ExampleContent = @"const express = require('express');
+const crypto = require('crypto');
+
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+
+app.post('/webhooks/cms', express.raw({type: '*/*'}), (req, res) => {
+  // Verify signature
+  const signature = req.headers['x-webhook-signature'];
+  const computed = crypto
+    .createHmac('sha256', WEBHOOK_SECRET)
+    .update(req.body)
+    .digest('hex');
+
+  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computed))) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  // Parse payload
+  const event = JSON.parse(req.body);
+
+  // Acknowledge receipt immediately
+  res.status(200).json({ received: true });
+
+  // Process asynchronously
+  processWebhookEvent(event).catch(err => {
+    console.error('Webhook processing failed:', err);
+  });
+});
+
+async function processWebhookEvent(event) {
+  switch (event.type) {
+    case 'content.published':
+      await invalidateCache(event.data.url);
+      break;
+    case 'content.deleted':
+      await removeFromSearch(event.data.contentId);
+      break;
+  }
+}",
+                            Hints = new List<string>
+                            {
+                                "Always use timing-safe comparison for signatures",
+                                "Process webhooks asynchronously to respond within timeout",
+                                "Store webhook secret in environment variables, never in code"
+                            }
+                        }
+                    }
+                },
+                new Lesson
+                {
+                    Id = "we-integration-patterns",
+                    ModuleId = "webhooks-events",
+                    Title = "Integration Patterns",
+                    Summary = "Learn common patterns for webhook-based integrations.",
+                    Order = 4,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Implement cache invalidation with webhooks",
+                        "Build search index synchronization",
+                        "Create notification integrations"
+                    },
+                    Content = @"
+<h2>Integration Patterns</h2>
+<p>Webhooks enable powerful integrations. These patterns show common implementations.</p>
+
+<h3>Pattern 1: Cache Invalidation</h3>
+<p>Automatically clear CDN/application cache when content changes:</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>async function handlePublish(event) {
+  const paths = [
+    event.data.url,
+    '/sitemap.xml',
+    '/' // homepage if affected
+  ];
+
+  await Promise.all(paths.map(path =>
+    cdn.purge(path)
+  ));
+}</code></pre>
+
+<h3>Pattern 2: Search Index Sync</h3>
+<p>Keep external search engines synchronized:</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>async function syncToSearch(event) {
+  if (event.type === 'content.published') {
+    const content = await fetchFullContent(event.data.contentId);
+    await searchClient.index({
+      id: event.data.contentId,
+      title: content.title,
+      body: content.content,
+      url: event.data.url
+    });
+  } else if (event.type === 'content.deleted') {
+    await searchClient.delete(event.data.contentId);
+  }
+}</code></pre>
+
+<h3>Pattern 3: Slack Notifications</h3>
+<p>Notify teams of content activity:</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>async function notifySlack(event) {
+  const message = {
+    text: `Content ${event.type.split('.')[1]}: ${event.data.url}`,
+    blocks: [{
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*${event.data.contentType}* was ${event.type.split('.')[1]}\n` +
+              `URL: ${event.data.url}\n` +
+              `Language: ${event.data.language}`
+      }
+    }]
+  };
+
+  await slack.postMessage('#content-updates', message);
+}</code></pre>
+
+<h3>Pattern 4: Static Site Rebuilds</h3>
+<p>Trigger static site regeneration:</p>
+<ul>
+    <li>Receive publish webhook</li>
+    <li>Trigger CI/CD pipeline (GitHub Actions, Netlify, Vercel)</li>
+    <li>Rebuild affected pages or full site</li>
+    <li>Deploy updated static files</li>
+</ul>
+
+<h3>Pattern 5: Data Warehouse Sync</h3>
+<p>Keep analytics systems updated:</p>
+<ul>
+    <li>Track content lifecycle events</li>
+    <li>Store in data warehouse</li>
+    <li>Build content analytics dashboards</li>
+    <li>Analyze publishing patterns</li>
+</ul>
+
+<div class=""bg-green-50 dark:bg-green-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">✅ Success Tip</p>
+    <p>Combine multiple webhook handlers behind a single endpoint that routes events to appropriate processors. This simplifies webhook management.</p>
+</div>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 13: Troubleshooting & Debugging
+
+    private LearningModule BuildTroubleshootingModule()
+    {
+        return new LearningModule
+        {
+            Id = "troubleshooting",
+            Title = "Troubleshooting & Debugging",
+            Description = "Diagnose and resolve common issues in CMS (SaaS) implementations.",
+            Icon = "bug-ant",
+            Order = 13,
+            Difficulty = ModuleDifficulty.Intermediate,
+            Prerequisites = new[] { "getting-started", "rest-api", "graph-integration" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "ts-common-issues",
+                    ModuleId = "troubleshooting",
+                    Title = "Common Issues & Solutions",
+                    Summary = "Learn to identify and resolve frequently encountered problems.",
+                    Order = 1,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Identify common CMS (SaaS) issues",
+                        "Apply systematic troubleshooting approaches",
+                        "Resolve typical configuration problems"
+                    },
+                    Content = @"
+<h2>Common Issues & Solutions</h2>
+<p>Understanding common issues helps you quickly diagnose and resolve problems in your CMS (SaaS) implementation.</p>
+
+<h3>Content Not Appearing in Graph</h3>
+<p><strong>Symptoms:</strong> Published content isn't returned by Graph queries</p>
+<p><strong>Possible Causes:</strong></p>
+<ul>
+    <li>Content not actually published (still in draft)</li>
+    <li>Indexing delay (wait 1-2 minutes)</li>
+    <li>Content type not configured for indexing</li>
+    <li>Query filters excluding the content</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+    <li>Verify publish status in CMS UI</li>
+    <li>Check <code>_metadata.status</code> in your query</li>
+    <li>Review content type indexing configuration</li>
+    <li>Simplify query to remove filters</li>
+</ol>
+
+<h3>Authentication Failures</h3>
+<p><strong>Symptoms:</strong> 401/403 errors from REST API or Graph</p>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Error</th>
+            <th class=""px-4 py-2 text-left"">Cause</th>
+            <th class=""px-4 py-2 text-left"">Solution</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">401 Unauthorized</td><td class=""px-4 py-2"">Invalid or expired token</td><td class=""px-4 py-2"">Refresh authentication token</td></tr>
+        <tr><td class=""px-4 py-2"">403 Forbidden</td><td class=""px-4 py-2"">Insufficient permissions</td><td class=""px-4 py-2"">Check API key scopes</td></tr>
+        <tr><td class=""px-4 py-2"">Invalid API Key</td><td class=""px-4 py-2"">Wrong key or environment</td><td class=""px-4 py-2"">Verify key for correct instance</td></tr>
+    </tbody>
+</table>
+
+<h3>Visual Builder Issues</h3>
+<p><strong>Symptoms:</strong> Elements not rendering, styles missing, preview problems</p>
+<p><strong>Common causes:</strong></p>
+<ul>
+    <li>Missing element definitions</li>
+    <li>Invalid display template configuration</li>
+    <li>Browser caching old assets</li>
+    <li>Content type mismatches</li>
+</ul>
+
+<h3>Performance Issues</h3>
+<p><strong>Symptoms:</strong> Slow page loads, timeout errors, high latency</p>
+<p><strong>Investigation steps:</strong></p>
+<ol>
+    <li>Check Graph query complexity</li>
+    <li>Review content reference depth</li>
+    <li>Verify CDN configuration</li>
+    <li>Monitor API response times</li>
+</ol>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">⚠️ Troubleshooting Tip</p>
+    <p>Always check the simplest explanation first. Most issues are caused by content not being published, incorrect environment configuration, or caching.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "ts-debugging-graph",
+                    ModuleId = "troubleshooting",
+                    Title = "Debugging Graph Queries",
+                    Summary = "Diagnose and fix issues with Optimizely Graph queries.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Debug GraphQL query errors",
+                        "Use Graph introspection for troubleshooting",
+                        "Optimize poorly performing queries"
+                    },
+                    Content = @"
+<h2>Debugging Graph Queries</h2>
+<p>Graph queries can fail or return unexpected results for various reasons. Systematic debugging helps identify the cause.</p>
+
+<h3>Common Query Errors</h3>
+
+<h4>Syntax Errors</h4>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code># Error: Expected Name, found }
+query {
+  ArticlePage {
+    items {
+      title,  # Trailing comma causes error
+    }
+  }
+}</code></pre>
+
+<h4>Unknown Field</h4>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code># Error: Cannot query field ""tittle"" on type ""ArticlePage""
+query {
+  ArticlePage {
+    items {
+      tittle  # Typo in field name
+    }
+  }
+}</code></pre>
+
+<h3>Using Introspection</h3>
+<p>Query the schema to verify field names and types:</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query IntrospectType {
+  __type(name: ""ArticlePage"") {
+    fields {
+      name
+      type {
+        name
+        kind
+      }
+    }
+  }
+}</code></pre>
+
+<h3>Empty Results Debugging</h3>
+<p>When queries return no results:</p>
+<ol>
+    <li><strong>Remove all filters</strong> - Verify content exists at all</li>
+    <li><strong>Add filters one by one</strong> - Find the problematic filter</li>
+    <li><strong>Check locale</strong> - Content may not exist in requested language</li>
+    <li><strong>Verify status</strong> - Include draft content temporarily</li>
+</ol>
+
+<h3>Performance Debugging</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Issue</th>
+            <th class=""px-4 py-2 text-left"">Cause</th>
+            <th class=""px-4 py-2 text-left"">Solution</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Slow queries</td><td class=""px-4 py-2"">Deep nested fragments</td><td class=""px-4 py-2"">Flatten query structure</td></tr>
+        <tr><td class=""px-4 py-2"">Timeouts</td><td class=""px-4 py-2"">Too many items requested</td><td class=""px-4 py-2"">Use pagination (limit/skip)</td></tr>
+        <tr><td class=""px-4 py-2"">Large payloads</td><td class=""px-4 py-2"">Requesting unnecessary fields</td><td class=""px-4 py-2"">Select only needed fields</td></tr>
+    </tbody>
+</table>
+
+<h3>Using the Graph Explorer</h3>
+<p>The Graph Explorer UI provides:</p>
+<ul>
+    <li>Syntax highlighting and validation</li>
+    <li>Schema documentation</li>
+    <li>Query history</li>
+    <li>Response inspection</li>
+    <li>Variable management</li>
+</ul>
+
+<div class=""bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">💡 Key Insight</p>
+    <p>Use the Graph Explorer to test and refine queries before implementing them in your application. It provides immediate feedback on errors.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "ts-api-debugging",
+                    ModuleId = "troubleshooting",
+                    Title = "REST API Troubleshooting",
+                    Summary = "Diagnose and resolve REST API integration issues.",
+                    Order = 3,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Interpret API error responses",
+                        "Debug request/response issues",
+                        "Use API testing tools effectively"
+                    },
+                    Content = @"
+<h2>REST API Troubleshooting</h2>
+<p>REST API issues often stem from authentication, request formatting, or permission problems.</p>
+
+<h3>HTTP Status Codes</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Code</th>
+            <th class=""px-4 py-2 text-left"">Meaning</th>
+            <th class=""px-4 py-2 text-left"">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">400 Bad Request</td><td class=""px-4 py-2"">Invalid request format</td><td class=""px-4 py-2"">Check JSON syntax and required fields</td></tr>
+        <tr><td class=""px-4 py-2"">401 Unauthorized</td><td class=""px-4 py-2"">Missing/invalid auth</td><td class=""px-4 py-2"">Verify Authorization header</td></tr>
+        <tr><td class=""px-4 py-2"">403 Forbidden</td><td class=""px-4 py-2"">Permission denied</td><td class=""px-4 py-2"">Check API key permissions</td></tr>
+        <tr><td class=""px-4 py-2"">404 Not Found</td><td class=""px-4 py-2"">Resource doesn't exist</td><td class=""px-4 py-2"">Verify endpoint URL and IDs</td></tr>
+        <tr><td class=""px-4 py-2"">409 Conflict</td><td class=""px-4 py-2"">Conflicting operation</td><td class=""px-4 py-2"">Check for concurrent edits</td></tr>
+        <tr><td class=""px-4 py-2"">422 Unprocessable</td><td class=""px-4 py-2"">Validation failed</td><td class=""px-4 py-2"">Review validation errors in response</td></tr>
+        <tr><td class=""px-4 py-2"">429 Too Many Requests</td><td class=""px-4 py-2"">Rate limited</td><td class=""px-4 py-2"">Implement backoff/retry</td></tr>
+        <tr><td class=""px-4 py-2"">500 Server Error</td><td class=""px-4 py-2"">Internal error</td><td class=""px-4 py-2"">Contact support with request ID</td></tr>
+    </tbody>
+</table>
+
+<h3>Reading Error Responses</h3>
+<p>API errors include helpful details:</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+  ""error"": {
+    ""code"": ""VALIDATION_ERROR"",
+    ""message"": ""Content validation failed"",
+    ""details"": [
+      {
+        ""field"": ""title"",
+        ""error"": ""Title is required""
+      },
+      {
+        ""field"": ""slug"",
+        ""error"": ""Slug must be unique""
+      }
+    ],
+    ""requestId"": ""req_abc123""
+  }
+}</code></pre>
+
+<h3>Using API Testing Tools</h3>
+<p>Test API calls with tools like Postman or curl:</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>curl -X GET \
+  'https://api.cms.optimizely.com/v1/content' \
+  -H 'Authorization: Bearer YOUR_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -v  # Verbose output shows full request/response</code></pre>
+
+<h3>Debugging Checklist</h3>
+<ul>
+    <li>☐ Is the endpoint URL correct?</li>
+    <li>☐ Is the HTTP method correct (GET/POST/PUT/DELETE)?</li>
+    <li>☐ Is the Authorization header present and valid?</li>
+    <li>☐ Is the Content-Type header set correctly?</li>
+    <li>☐ Is the request body valid JSON?</li>
+    <li>☐ Are all required fields included?</li>
+    <li>☐ Are IDs and references valid?</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "ts-content-issues",
+                    ModuleId = "troubleshooting",
+                    Title = "Content & Publishing Issues",
+                    Summary = "Resolve issues with content creation, editing, and publishing.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Troubleshoot content creation problems",
+                        "Resolve publishing failures",
+                        "Fix content display issues"
+                    },
+                    Content = @"
+<h2>Content & Publishing Issues</h2>
+<p>Content-related issues can affect editors and end users. Understanding common problems helps resolve them quickly.</p>
+
+<h3>Content Creation Issues</h3>
+
+<h4>""Content Type Not Found""</h4>
+<ul>
+    <li>Content type may have been deleted or renamed</li>
+    <li>User may lack permission to create that type</li>
+    <li>Check Admin > Content Types for availability</li>
+</ul>
+
+<h4>Validation Errors</h4>
+<ul>
+    <li>Required fields not filled</li>
+    <li>Field value doesn't match validation rules</li>
+    <li>Unique constraint violated (duplicate slug)</li>
+</ul>
+
+<h3>Publishing Failures</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Issue</th>
+            <th class=""px-4 py-2 text-left"">Cause</th>
+            <th class=""px-4 py-2 text-left"">Solution</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Can't publish</td><td class=""px-4 py-2"">Missing publish permission</td><td class=""px-4 py-2"">Check user role and access rights</td></tr>
+        <tr><td class=""px-4 py-2"">Workflow blocked</td><td class=""px-4 py-2"">Pending approval step</td><td class=""px-4 py-2"">Complete required approvals</td></tr>
+        <tr><td class=""px-4 py-2"">Parent not published</td><td class=""px-4 py-2"">Required parent content missing</td><td class=""px-4 py-2"">Publish parent content first</td></tr>
+        <tr><td class=""px-4 py-2"">Scheduled conflict</td><td class=""px-4 py-2"">Publish date in past</td><td class=""px-4 py-2"">Update schedule or publish immediately</td></tr>
+    </tbody>
+</table>
+
+<h3>Content Not Displaying</h3>
+<p>When published content doesn't appear on the frontend:</p>
+<ol>
+    <li><strong>Verify publish status</strong> - Check in CMS UI</li>
+    <li><strong>Check language</strong> - Content may exist in different language</li>
+    <li><strong>Clear caches</strong> - CDN, application, and browser caches</li>
+    <li><strong>Check Graph indexing</strong> - Wait for indexing to complete</li>
+    <li><strong>Review access rights</strong> - Content may require authentication</li>
+</ol>
+
+<h3>Version Conflicts</h3>
+<p>When multiple editors work on the same content:</p>
+<ul>
+    <li>Optimistic locking prevents overwriting changes</li>
+    <li>""Content modified by another user"" error appears</li>
+    <li>Refresh and merge changes, or create new draft</li>
+</ul>
+
+<div class=""bg-green-50 dark:bg-green-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">✅ Prevention Tip</p>
+    <p>Use content locking features to prevent conflicts when multiple editors work on the same content. Establish clear ownership for content updates.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "ts-getting-help",
+                    ModuleId = "troubleshooting",
+                    Title = "Getting Help & Support",
+                    Summary = "Learn how to effectively get support for CMS (SaaS) issues.",
+                    Order = 5,
+                    EstimatedMinutes = 8,
+                    LearningObjectives = new List<string>
+                    {
+                        "Know where to find documentation and resources",
+                        "Prepare effective support requests",
+                        "Use community resources"
+                    },
+                    Content = @"
+<h2>Getting Help & Support</h2>
+<p>When you can't resolve an issue yourself, knowing how to get effective help is crucial.</p>
+
+<h3>Documentation Resources</h3>
+<ul>
+    <li><strong>Optimizely Documentation</strong> - Official docs at docs.developers.optimizely.com</li>
+    <li><strong>API Reference</strong> - Complete REST API documentation</li>
+    <li><strong>Graph Schema Explorer</strong> - Interactive schema documentation</li>
+    <li><strong>Release Notes</strong> - Latest features and changes</li>
+</ul>
+
+<h3>Community Resources</h3>
+<ul>
+    <li><strong>Optimizely World</strong> - Community forums and knowledge base</li>
+    <li><strong>GitHub Samples</strong> - Example implementations</li>
+    <li><strong>Stack Overflow</strong> - Tag: optimizely-cms</li>
+    <li><strong>Partner Network</strong> - Certified implementation partners</li>
+</ul>
+
+<h3>Contacting Support</h3>
+<p>When filing a support ticket, include:</p>
+<ol>
+    <li><strong>Environment details</strong> - Instance URL, integration type</li>
+    <li><strong>Steps to reproduce</strong> - Exact sequence of actions</li>
+    <li><strong>Expected vs actual behavior</strong> - What should happen vs what happens</li>
+    <li><strong>Error messages</strong> - Full error text and codes</li>
+    <li><strong>Request IDs</strong> - From API error responses</li>
+    <li><strong>Screenshots/recordings</strong> - Visual evidence of the issue</li>
+    <li><strong>Timing</strong> - When did the issue start?</li>
+</ol>
+
+<h3>Support Tiers</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Severity</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+            <th class=""px-4 py-2 text-left"">Response Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Critical</td><td class=""px-4 py-2"">Production down, no workaround</td><td class=""px-4 py-2"">1 hour</td></tr>
+        <tr><td class=""px-4 py-2"">High</td><td class=""px-4 py-2"">Major feature impacted</td><td class=""px-4 py-2"">4 hours</td></tr>
+        <tr><td class=""px-4 py-2"">Medium</td><td class=""px-4 py-2"">Feature impacted, workaround exists</td><td class=""px-4 py-2"">1 business day</td></tr>
+        <tr><td class=""px-4 py-2"">Low</td><td class=""px-4 py-2"">Question or minor issue</td><td class=""px-4 py-2"">2 business days</td></tr>
+    </tbody>
+</table>
+
+<h3>Self-Service Tools</h3>
+<ul>
+    <li><strong>Status page</strong> - Check for known outages</li>
+    <li><strong>Health checks</strong> - Verify system status</li>
+    <li><strong>Audit logs</strong> - Review recent changes</li>
+    <li><strong>Activity logs</strong> - Track user actions</li>
+</ul>
+
+<div class=""bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-4"">
+    <p class=""font-semibold"">💡 Key Insight</p>
+    <p>Before contacting support, check the status page and try reproducing the issue in a clean environment. Many issues are temporary or environment-specific.</p>
+</div>
 "
                 }
             }
