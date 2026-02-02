@@ -11,7 +11,9 @@
       "Bash(dotnet run:*)",
       "WebFetch(domain:docs.developers.optimizely.com)",
       "WebFetch(domain:support.optimizely.com)",
-      "WebFetch(domain:www.optimizely.com)"
+      "WebFetch(domain:www.optimizely.com)",
+      "Bash(findstr:*)",
+      "Read(//d/**)"
     ]
   }
 }
