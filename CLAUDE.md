@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Optimizely Learning Centre is a **Blazor WebAssembly (WASM)** interactive multi-course learning platform for Optimizely products including Graph (GraphQL API) and Opal (AI-assisted content). This is a client-side only application with no backend server.
+Optimizely Learning Centre is a **Blazor WebAssembly (WASM)** interactive multi-course learning platform for Optimizely products. This is a client-side only application with no backend server.
+
+**Available Courses:** Graph, Opal, SaaS, CMS12, CMS13, DXP, CMP, WebExp, FeatureExp
 
 ## Build Commands
 
@@ -32,35 +34,50 @@ cd src/OptimizelyLearningCentre.Client && npm run css:watch
 - **Tailwind CSS 3.4** for styling
 - **Blazored.LocalStorage** for browser persistence
 
+### Multi-Course Architecture
+The platform uses a pluggable course system centered around `CourseDefinition` and `ICourseRegistry`:
+
+**Course Registration Pattern** (`Program.cs`):
+```csharp
+builder.Services.AddSingleton<ICourseRegistry>(sp => {
+    var registry = new CourseRegistry();
+    registry.RegisterCourse(GraphCourse.Definition);
+    // ... other courses
+    return registry;
+});
+```
+
+**Each course provides:**
+- `CourseDefinition` - Metadata, nav items, brand colors, external links
+- `ContentProvider` - Implements `ILearningContentProvider` with modules and lessons
+- Course-specific pages (e.g., `Settings.razor`, `Playground.razor`)
+- Optional interactive components (e.g., `TryItPanel`)
+
+**Course folder structure** (`Courses/{CourseName}/`):
+- `{CourseName}Course.cs` - Static `CourseDefinition`
+- `{CourseName}ContentProvider.cs` - Module/lesson content (often large files)
+- `Pages/` - Course-specific Razor pages
+- `Components/` - Course-specific components
+
 ### State Management
-Uses property-based state stores implementing `INotifyPropertyChanged`:
-- **AppState** (`State/AppState.cs`) - Global app state: connection status, sidebar toggle, loading indicators, notifications
-- **QueryState** (`State/QueryState.cs`) - Query builder state: current query definition, raw query, variables, execution history
+Property-based state stores implementing `INotifyPropertyChanged`:
+- **AppState** - Global: connection status, sidebar toggle, loading, notifications
+- **QueryState** - Query builder: query definition, raw query, variables, history
 
-### Core Services (all registered as Scoped in DI)
-- **IGraphQLClient/GraphQLClient** - Executes GraphQL queries with HMAC, SingleKey, or no authentication
-- **ISettingsService/LocalStorageSettingsService** - Persists GraphQL connection settings to browser localStorage
-- **ISchemaService/SchemaService** - GraphQL schema introspection with caching
-- **IQueryBuilderService/QueryBuilderService** - Constructs GraphQL queries from structured definitions
-- **ILearningService/LearningService** - Manages learning modules and lessons (contains substantial embedded content)
+### Core Services (Scoped in DI)
+- **ICourseRegistry** (Singleton) - Manages registered courses
+- **ICourseContext** - Current course context and navigation
+- **ILearningService** - Orchestrates learning content across courses
+- **ISettingsService** - Persists settings to browser localStorage
 
-### Authentication Modes
-The GraphQL client supports three authentication modes defined in `Models/Configuration/GraphSettings.cs`:
-1. **HMAC** - AppKey + Secret for secured queries
-2. **SingleKey** - Public single authentication key
-3. **None** - No authentication
+### Graph-Specific Services
+- **IGraphQLClient** - Executes queries with HMAC, SingleKey, or no auth
+- **ISchemaService** - Schema introspection with caching
+- **IQueryBuilderService** - Constructs GraphQL queries from definitions
 
-### Key Pages
-- `Pages/Home.razor` - Landing page
-- `Pages/Playground.razor` - GraphQL query sandbox
-- `Pages/QueryBuilder.razor` - Visual query builder
-- `Pages/Settings.razor` - Connection configuration
-- `Pages/Learn/` - Learning modules and lessons
-
-### Component Organization
-- `Components/Common/` - Reusable UI components (Badge, Card, JsonViewer, LoadingSpinner)
-- `Components/Learning/` - Learning-specific components (TryItPanel)
-- `Layout/` - MainLayout and NavMenu
+### Shared vs Course-Specific Pages
+**Shared pages** (`Pages/`): Home, Learn/Index, Learn/Module, About, NotFound
+**Course pages** (`Courses/{Course}/Pages/`): Settings, Playground, QueryBuilder
 
 ## Styling
 
@@ -70,4 +87,13 @@ Tailwind is configured with custom Optimizely brand colors in `tailwind.config.j
 - `opti-accent`: #00D4AA
 - `opti-light`: #f8fafc
 
-Source CSS is in `Styles/app.css`, compiled output goes to `wwwroot/css/app.css`.
+Source CSS: `Styles/app.css` → Compiled: `wwwroot/css/app.css`
+
+## Adding a New Course
+
+1. Create folder `Courses/{CourseName}/`
+2. Add `{CourseName}Course.cs` with static `Definition` property
+3. Add `{CourseName}ContentProvider.cs` implementing `ILearningContentProvider`
+4. Register in `Program.cs`: `registry.RegisterCourse({CourseName}Course.Definition)`
+5. Register content provider: `builder.Services.AddScoped<{CourseName}ContentProvider>()`
+6. Add course-specific pages in `Courses/{CourseName}/Pages/`
