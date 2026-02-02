@@ -8,7 +8,9 @@
       "Bash(dotnet build:*)",
       "Bash(npm run build:css:*)",
       "Bash(timeout:*)",
-      "Bash(dotnet run:*)"
+      "Bash(dotnet run:*)",
+      "WebFetch(domain:docs.developers.optimizely.com)",
+      "WebFetch(domain:support.optimizely.com)"
     ]
   }
 }
