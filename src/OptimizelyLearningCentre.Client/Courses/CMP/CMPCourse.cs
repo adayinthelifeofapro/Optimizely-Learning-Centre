@@ -11,7 +11,7 @@ public static class CMPCourse
     public static CourseDefinition Definition => new()
     {
         Id = "cmp",
-        Name = "Content Marketing Platform",
+        Name = "Optimizely Content Marketing Platform",
         Description = "Master content planning, collaboration, and publishing with Optimizely CMP",
         LongDescription = "Learn how to streamline your marketing operations with Optimizely Content Marketing Platform. Master campaign management, workflow automation, digital asset management, and multi-channel publishing to deliver on-brand content at scale.",
         Icon = "calendar-days",

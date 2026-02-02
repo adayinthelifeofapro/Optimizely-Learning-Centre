@@ -19,7 +19,9 @@
       "WebFetch(domain:support.optimizely.com)",
       "Bash(dir /s \"d:\\\\Projects\\\\Optimizely\\\\Opti Graph Learning Centre\\\\src\\\\OptimizelyLearningCentre.Client\\\\Courses\\\\DXP\")",
       "Bash(dir:*)",
-      "WebFetch(domain:world.optimizely.com)"
+      "WebFetch(domain:world.optimizely.com)",
+      "Bash(wc:*)",
+      "Bash(for f in */*ContentProvider.cs)"
     ]
   }
 }

@@ -11,7 +11,7 @@ public static class WebExpCourse
     public static CourseDefinition Definition => new()
     {
         Id = "webexp",
-        Name = "Web Experimentation",
+        Name = "Optimizely Web Experimentation",
         Description = "Master A/B testing and experimentation with Optimizely Web Experimentation",
         LongDescription = "Learn to create and run powerful A/B tests with Optimizely Web Experimentation. Master the Visual Editor, JavaScript API, audience targeting, custom events, Stats Engine analytics, and integrations to optimize your website's performance and user experience.",
         Icon = "beaker",
