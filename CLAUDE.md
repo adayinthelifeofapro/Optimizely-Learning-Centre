@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Optimizely Learning Centre is a **Blazor WebAssembly (WASM)** interactive multi-course learning platform for Optimizely products. This is a client-side only application with no backend server.
 
-**Available Courses:** Graph, Opal, SaaS, CMS12, CMS13, DXP, CMP, WebExp, FeatureExp
+**Available Courses:** Graph, Opal, SaaS, CMS12, CMS13, DXP, CMP, WebExp, FeatureExp, Commerce, ContentRecs, ODP, ConfiguredCommerce, Analytics
 
 ## Build Commands
 

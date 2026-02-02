@@ -15,6 +15,11 @@ An interactive multi-course learning platform for Optimizely products. Built wit
 | **CMP** | Content Marketing Platform - Marketing content workflows |
 | **Web Experimentation** | A/B testing and website optimization |
 | **Feature Experimentation** | Feature flags and server-side experimentation |
+| **Commerce** | [Optimizely Commerce Connect](https://docs.developers.optimizely.com/commerce-connect) - E-commerce integration |
+| **Content Recommendations** | [Content Recommendations](https://docs.developers.optimizely.com/recommendations) - AI-powered content recommendations |
+| **ODP** | [Optimizely Data Platform](https://docs.developers.optimizely.com/optimizely-data-platform) - Customer data platform |
+| **Configured Commerce** | [Configured Commerce](https://docs.developers.optimizely.com/configured-commerce) - B2B commerce solution |
+| **Analytics** | [Optimizely Analytics](https://docs.developers.optimizely.com/analytics) - Web analytics and reporting |
 
 ## Features
 
@@ -101,7 +106,12 @@ src/OptimizelyLearningCentre.Client/
 │   ├── DXP/              # DXP course
 │   ├── CMP/              # CMP course
 │   ├── WebExp/           # Web Experimentation course
-│   └── FeatureExp/       # Feature Experimentation course
+│   ├── FeatureExp/       # Feature Experimentation course
+│   ├── Commerce/         # Commerce Connect course
+│   ├── ContentRecs/      # Content Recommendations course
+│   ├── ODP/              # Optimizely Data Platform course
+│   ├── ConfiguredCommerce/  # Configured Commerce course
+│   └── Analytics/        # Optimizely Analytics course
 ├── Layout/               # MainLayout and NavMenu
 ├── Models/
 │   ├── Configuration/    # Connection settings
@@ -195,4 +205,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - [Optimizely CMS Documentation](https://docs.developers.optimizely.com/content-cloud)
 - [Optimizely Feature Experimentation](https://docs.developers.optimizely.com/feature-experimentation)
 - [Optimizely Web Experimentation](https://docs.developers.optimizely.com/web-experimentation)
+- [Optimizely Commerce Connect](https://docs.developers.optimizely.com/commerce-connect)
+- [Optimizely Data Platform](https://docs.developers.optimizely.com/optimizely-data-platform)
+- [Optimizely Configured Commerce](https://docs.developers.optimizely.com/configured-commerce)
+- [Optimizely Content Recommendations](https://docs.developers.optimizely.com/recommendations)
+- [Optimizely Analytics](https://docs.developers.optimizely.com/analytics)
 - [Blazor WebAssembly Documentation](https://docs.microsoft.com/aspnet/core/blazor/)
