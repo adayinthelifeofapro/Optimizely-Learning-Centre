@@ -58,7 +58,11 @@ public class CMS13ContentProvider : ILearningContentProvider
             BuildGraphIntegrationModule(),
             BuildLanguagesModule(),
             BuildContentVariationsModule(),
-            BuildFrameworkModule()
+            BuildFrameworkModule(),
+            BuildApplicationsModule(),
+            BuildHeadlessPreviewModule(),
+            BuildSmoothRebuildModule(),
+            BuildMigrationModule()
         };
     }
 
@@ -1546,6 +1550,222 @@ fr-BE            → nl-BE           → nl</code></pre>
     </ul>
 </div>
 "
+                },
+                new Lesson
+                {
+                    Id = "cv-api",
+                    ModuleId = "content-variations",
+                    Title = "Variations API Deep Dive",
+                    Summary = "Explore the programmatic API for managing content variations.",
+                    Order = 3,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Use IContentVariantRepository for variation management",
+                        "Create and modify variations programmatically",
+                        "Query and filter variations effectively"
+                    },
+                    Content = @"
+<h2>Variations API Deep Dive</h2>
+<p>CMS 13 provides a comprehensive API for managing content variations programmatically, enabling sophisticated experimentation and personalization scenarios.</p>
+
+<h3>IContentVariantRepository</h3>
+<p>The central interface for variation management:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public interface IContentVariantRepository
+{
+    // List all variations for a content item
+    IEnumerable&lt;ContentVariant&gt; List(ContentReference contentLink);
+
+    // Create a new variation
+    ContentVariant Create(ContentReference contentLink, string variantKey);
+
+    // Delete a variation
+    void Delete(ContentReference contentLink, string variantKey);
+
+    // Get a specific variation
+    ContentVariant Get(ContentReference contentLink, string variantKey);
+}</code></pre>
+
+<h3>Creating Variations Programmatically</h3>
+<p>Create variations for A/B testing or personalization:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class VariationService
+{
+    private readonly IContentVariantRepository _variantRepository;
+    private readonly IContentRepository _contentRepository;
+
+    public void CreateExperimentVariation(ContentReference contentLink)
+    {
+        // Create a new variation with a unique key
+        var variant = _variantRepository.Create(
+            contentLink,
+            $""experiment-{Guid.NewGuid():N}""
+        );
+
+        // Get the variation as editable content
+        var content = _contentRepository.Get&lt;IContent&gt;(
+            variant.ContentLink
+        ).CreateWritableClone();
+
+        // Modify properties
+        if (content is IContentData pageData)
+        {
+            pageData.Property[""Heading""].Value = ""Variation B Heading"";
+        }
+
+        // Save the variation
+        _contentRepository.Save(content, SaveAction.Publish);
+    }
+}</code></pre>
+
+<h3>Querying Variations</h3>
+<p>Retrieve and filter variations:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// List all variations for a page
+var variations = _variantRepository.List(pageReference);
+
+foreach (var variant in variations)
+{
+    Console.WriteLine($""Key: {variant.VariantKey}"");
+    Console.WriteLine($""Status: {variant.Status}"");
+    Console.WriteLine($""Created: {variant.Created}"");
+}</code></pre>
+
+<h3>Variation Lifecycle Management</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Operation</th>
+            <th class=""px-4 py-2 text-left"">Method</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Create</td><td class=""px-4 py-2""><code>Create()</code></td><td class=""px-4 py-2"">Creates a new variation with specified key</td></tr>
+        <tr><td class=""px-4 py-2"">Read</td><td class=""px-4 py-2""><code>Get()</code></td><td class=""px-4 py-2"">Retrieves a specific variation</td></tr>
+        <tr><td class=""px-4 py-2"">List</td><td class=""px-4 py-2""><code>List()</code></td><td class=""px-4 py-2"">Lists all variations for content</td></tr>
+        <tr><td class=""px-4 py-2"">Delete</td><td class=""px-4 py-2""><code>Delete()</code></td><td class=""px-4 py-2"">Removes a variation permanently</td></tr>
+        <tr><td class=""px-4 py-2"">Promote</td><td class=""px-4 py-2"">Copy to Original</td><td class=""px-4 py-2"">Merge variation changes to primary content</td></tr>
+    </tbody>
+</table>
+
+<h3>Best Practices</h3>
+<ul>
+    <li><strong>Naming conventions</strong> - Use descriptive variant keys that indicate purpose (e.g., <code>experiment-cta-color</code>)</li>
+    <li><strong>Cleanup</strong> - Delete variations after experiments conclude to maintain database hygiene</li>
+    <li><strong>Permissions</strong> - Ensure proper access rights for variation management</li>
+    <li><strong>Auditing</strong> - Track variation creation and modifications for compliance</li>
+</ul>
+"
+                },
+                new Lesson
+                {
+                    Id = "cv-graph",
+                    ModuleId = "content-variations",
+                    Title = "Graph Integration for Variations",
+                    Summary = "Learn how content variations are indexed and queried through Optimizely Graph.",
+                    Order = 4,
+                    EstimatedMinutes = 8,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand how variations are indexed to Graph",
+                        "Query variations using GraphQL",
+                        "Use variations for experimentation with Graph"
+                    },
+                    Content = @"
+<h2>Graph Integration for Variations</h2>
+<p>Content variations are automatically indexed to Optimizely Graph, enabling powerful querying capabilities for experimentation and personalization.</p>
+
+<h3>Automatic Indexing</h3>
+<p>When variations are created or modified, CMS 13 automatically indexes them to Graph:</p>
+<ul>
+    <li><strong>Published variations</strong> - Indexed as separate documents</li>
+    <li><strong>Draft variations</strong> - Also indexed for preview scenarios</li>
+    <li><strong>Unique identifiers</strong> - Each variation has a distinct Graph ID</li>
+</ul>
+
+<h3>Variation Identifier Format</h3>
+<p>Variations in Graph follow this identifier pattern:</p>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>Guid_Status_Language_VariantKey
+
+Example:
+a1b2c3d4-5678-90ab-cdef-123456789abc_Published_en_experiment-v1</code></pre>
+
+<h3>Querying Variations with GraphQL</h3>
+<p>Retrieve specific variations:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query GetVariations($contentId: String!) {
+  ArticlePage(
+    where: {
+      _metadata: {
+        key: { eq: $contentId }
+      }
+    }
+  ) {
+    items {
+      _metadata {
+        key
+        displayName
+        version
+      }
+      Heading
+      MainBody
+      _variations {
+        key
+        status
+      }
+    }
+  }
+}</code></pre>
+
+<h3>Filtering by Variation</h3>
+<p>Query a specific variation for A/B testing:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query GetExperimentVariation {
+  ArticlePage(
+    where: {
+      _variations: {
+        key: { eq: ""experiment-cta-blue"" }
+      }
+    }
+  ) {
+    items {
+      Heading
+      CallToActionText
+      CallToActionUrl
+    }
+  }
+}</code></pre>
+
+<h3>Experimentation Workflow</h3>
+<ol>
+    <li><strong>Create variations</strong> in the CMS for your experiment</li>
+    <li><strong>Variations are indexed</strong> automatically to Graph</li>
+    <li><strong>Frontend queries</strong> Graph for the appropriate variation based on user segment</li>
+    <li><strong>Track results</strong> using your analytics platform</li>
+    <li><strong>Promote winner</strong> using ""Copy changes to Original""</li>
+</ol>
+
+<h3>Performance Considerations</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Aspect</th>
+            <th class=""px-4 py-2 text-left"">Consideration</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Index Size</td><td class=""px-4 py-2"">Each variation increases index size; clean up unused variations</td></tr>
+        <tr><td class=""px-4 py-2"">Query Complexity</td><td class=""px-4 py-2"">Filtering by variation adds minimal overhead</td></tr>
+        <tr><td class=""px-4 py-2"">Sync Time</td><td class=""px-4 py-2"">Variations sync to Graph within standard indexing intervals</td></tr>
+    </tbody>
+</table>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Tip:</strong> Use Graph's caching layer to improve performance when serving variations to high-traffic pages.</p>
+</div>
+"
                 }
             }
         };
@@ -1718,6 +1938,1946 @@ fr-BE            → nl-BE           → nl</code></pre>
 
 <div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
     <p class=""text-blue-800 dark:text-blue-100""><strong>Tip:</strong> For very large exports, monitor the progress indicators and allow sufficient time for background processing to complete.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "fw-dependency-injection",
+                    ModuleId = "framework",
+                    Title = "Dependency Injection Changes",
+                    Summary = "Understand the shift from service locator patterns to constructor injection in CMS 13.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Migrate from ServiceLocator to constructor injection",
+                        "Use IServiceProvider for dynamic resolution",
+                        "Understand the deprecation of legacy patterns"
+                    },
+                    Content = @"
+<h2>Dependency Injection Changes</h2>
+<p>CMS 13 fully embraces modern .NET dependency injection patterns, deprecating the legacy ServiceLocator approach used in earlier versions.</p>
+
+<h3>What's Changing</h3>
+<p>The <code>ServiceLocator</code> pattern is deprecated in favor of constructor injection:</p>
+
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">CMS 12 (Legacy)</th>
+            <th class=""px-4 py-2 text-left"">CMS 13 (Modern)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class=""px-4 py-2""><code>ServiceLocator.Current.GetInstance&lt;T&gt;()</code></td>
+            <td class=""px-4 py-2"">Constructor injection</td>
+        </tr>
+        <tr>
+            <td class=""px-4 py-2""><code>EPiServer.ServiceLocation</code></td>
+            <td class=""px-4 py-2""><code>Microsoft.Extensions.DependencyInjection</code></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Before: ServiceLocator Pattern</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 approach (deprecated)
+public class MyService
+{
+    public void DoSomething()
+    {
+        var contentLoader = ServiceLocator.Current
+            .GetInstance&lt;IContentLoader&gt;();
+        var content = contentLoader.Get&lt;IContent&gt;(contentLink);
+    }
+}</code></pre>
+
+<h3>After: Constructor Injection</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 13 approach (recommended)
+public class MyService
+{
+    private readonly IContentLoader _contentLoader;
+
+    public MyService(IContentLoader contentLoader)
+    {
+        _contentLoader = contentLoader;
+    }
+
+    public void DoSomething()
+    {
+        var content = _contentLoader.Get&lt;IContent&gt;(contentLink);
+    }
+}</code></pre>
+
+<h3>Dynamic Resolution with IServiceProvider</h3>
+<p>When you need to resolve services dynamically (e.g., in factories):</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class ServiceFactory
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public ServiceFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public T GetService&lt;T&gt;() where T : class
+    {
+        return _serviceProvider.GetService&lt;T&gt;();
+    }
+
+    public T GetRequiredService&lt;T&gt;() where T : class
+    {
+        return _serviceProvider.GetRequiredService&lt;T&gt;();
+    }
+}</code></pre>
+
+<h3>Registering Services</h3>
+<p>Use standard ASP.NET Core patterns in <code>Startup.cs</code> or <code>Program.cs</code>:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>services.AddScoped&lt;IMyService, MyService&gt;();
+services.AddSingleton&lt;ICacheService, CacheService&gt;();
+services.AddTransient&lt;IDataProcessor, DataProcessor&gt;();</code></pre>
+
+<h3>Migration Checklist</h3>
+<ul>
+    <li>Search codebase for <code>ServiceLocator.Current</code></li>
+    <li>Replace with constructor injection where possible</li>
+    <li>Use <code>IServiceProvider</code> for factory patterns</li>
+    <li>Update unit tests to use proper mocking</li>
+    <li>Remove references to <code>EPiServer.ServiceLocation</code></li>
+</ul>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
+    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Warning:</strong> Code using <code>ServiceLocator</code> will still compile but may produce runtime warnings or behave unexpectedly in CMS 13.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "fw-api-changes",
+                    ModuleId = "framework",
+                    Title = "API Breaking Changes",
+                    Summary = "Learn about the significant API changes and deprecated types in CMS 13.",
+                    Order = 5,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Identify breaking API changes from CMS 12",
+                        "Update code using PageReference to ContentReference",
+                        "Handle IContentTypeRepository changes"
+                    },
+                    Content = @"
+<h2>API Breaking Changes</h2>
+<p>CMS 13 introduces several API changes that require code updates when migrating from CMS 12.</p>
+
+<h3>PageReference → ContentReference</h3>
+<p>The <code>PageReference</code> type has been fully deprecated. Use <code>ContentReference</code> everywhere:</p>
+
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">CMS 12</th>
+            <th class=""px-4 py-2 text-left"">CMS 13</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>PageReference</code></td><td class=""px-4 py-2""><code>ContentReference</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>PageReference.StartPage</code></td><td class=""px-4 py-2""><code>ContentReference.StartPage</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>PageReference.EmptyReference</code></td><td class=""px-4 py-2""><code>ContentReference.EmptyReference</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>PageReference.RootPage</code></td><td class=""px-4 py-2""><code>ContentReference.RootPage</code></td></tr>
+    </tbody>
+</table>
+
+<h3>Code Migration Example</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
+public void ProcessPage(PageReference pageRef)
+{
+    if (pageRef != PageReference.EmptyReference)
+    {
+        var children = _contentLoader.GetChildren&lt;PageData&gt;(pageRef);
+    }
+}
+
+// CMS 13
+public void ProcessPage(ContentReference contentRef)
+{
+    if (contentRef != ContentReference.EmptyReference)
+    {
+        var children = _contentLoader.GetChildren&lt;PageData&gt;(contentRef);
+    }
+}</code></pre>
+
+<h3>IContentTypeRepository Changes</h3>
+<p>The <code>IContentTypeRepository</code> interface is now non-generic:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
+var contentType = contentTypeRepository.Load&lt;ArticlePage&gt;();
+
+// CMS 13
+var contentType = contentTypeRepository.Load(typeof(ArticlePage));</code></pre>
+
+<h3>Removed Types and Methods</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Removed</th>
+            <th class=""px-4 py-2 text-left"">Replacement</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>ScheduledPlugIn</code> attribute</td><td class=""px-4 py-2"">Modern registration pattern</td></tr>
+        <tr><td class=""px-4 py-2""><code>EPiServer.PlugIn</code> namespace</td><td class=""px-4 py-2"">Standard DI patterns</td></tr>
+        <tr><td class=""px-4 py-2""><code>SiteDefinition</code></td><td class=""px-4 py-2""><code>IApplicationRepository</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>ISiteDefinitionRepository</code></td><td class=""px-4 py-2""><code>IApplicationRepository</code></td></tr>
+    </tbody>
+</table>
+
+<h3>Scheduled Jobs Migration</h3>
+<p>If you have custom scheduled jobs using the plugin attribute:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
+[ScheduledPlugIn(DisplayName = ""My Job"")]
+public class MyScheduledJob : ScheduledJobBase
+{
+    public override string Execute() { ... }
+}
+
+// CMS 13
+[ScheduledJob(
+    Guid = ""a1b2c3d4-5678-90ab-cdef-123456789abc"",
+    Name = ""My Job"")]
+public class MyScheduledJob : ScheduledJob
+{
+    public override DataStatus Execute(CancellationToken cancellationToken)
+    { ... }
+}</code></pre>
+
+<h3>Migration Strategy</h3>
+<ol>
+    <li><strong>Compile with warnings</strong> - CMS 13 will flag deprecated usages</li>
+    <li><strong>Search and replace</strong> - Use IDE tools for bulk <code>PageReference</code> → <code>ContentReference</code></li>
+    <li><strong>Update interfaces</strong> - Review all injected services for API changes</li>
+    <li><strong>Test thoroughly</strong> - Changes may have subtle behavioral differences</li>
+</ol>
+
+<div class=""bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4 my-4"">
+    <p class=""text-red-800 dark:text-red-100""><strong>Breaking Change:</strong> Using deprecated APIs may result in compilation errors or runtime exceptions in CMS 13. Address all deprecation warnings before deployment.</p>
+</div>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 9: Applications Management
+
+    private LearningModule BuildApplicationsModule()
+    {
+        return new LearningModule
+        {
+            Id = "applications",
+            Title = "Applications Management",
+            Description = "Learn about the new Application model that replaces SiteDefinition in CMS 13.",
+            Icon = "building-office",
+            Order = 9,
+            Difficulty = ModuleDifficulty.Intermediate,
+            Prerequisites = new[] { "overview" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "app-introduction",
+                    ModuleId = "applications",
+                    Title = "Introduction to Applications",
+                    Summary = "Understand the Application model that replaces SiteDefinition in CMS 13.",
+                    Order = 1,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand the Application model concept",
+                        "Learn why SiteDefinition was replaced",
+                        "Identify benefits of the new approach"
+                    },
+                    Content = @"
+<h2>Introduction to Applications</h2>
+<p>CMS 13 introduces a new <strong>Application model</strong> that replaces the <code>SiteDefinition</code> concept from previous versions. This change provides a more flexible and modern approach to managing multi-tenant and multi-site configurations.</p>
+
+<h3>What's Changing?</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">CMS 12</th>
+            <th class=""px-4 py-2 text-left"">CMS 13</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>SiteDefinition</code></td><td class=""px-4 py-2""><code>Application</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>ISiteDefinitionRepository</code></td><td class=""px-4 py-2""><code>IApplicationRepository</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>SiteDefinition.Current</code></td><td class=""px-4 py-2""><code>IApplicationResolver</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>SiteDefinitionResolver</code></td><td class=""px-4 py-2""><code>IApplicationResolver</code></td></tr>
+    </tbody>
+</table>
+
+<h3>Why the Change?</h3>
+<p>The Application model offers several advantages:</p>
+<ul>
+    <li><strong>Cleaner abstraction</strong> - Better separation of concerns between site configuration and content</li>
+    <li><strong>Multi-tenant support</strong> - Improved support for SaaS-like deployments</li>
+    <li><strong>Graph alignment</strong> - Better integration with Optimizely Graph's source concept</li>
+    <li><strong>Modern patterns</strong> - Follows contemporary .NET architectural patterns</li>
+</ul>
+
+<h3>Core Concepts</h3>
+<h4>Application</h4>
+<p>An Application represents a logical grouping of content with its own:</p>
+<ul>
+    <li>Start page and root content</li>
+    <li>Host bindings (domains)</li>
+    <li>Language configurations</li>
+    <li>Settings and preferences</li>
+</ul>
+
+<h4>Application Resolution</h4>
+<p>The system resolves the current application based on:</p>
+<ul>
+    <li>HTTP request host header</li>
+    <li>Request path</li>
+    <li>Configuration rules</li>
+</ul>
+
+<h3>Migration Path</h3>
+<p>Existing <code>SiteDefinition</code> data is migrated automatically during upgrade, but your code needs updates to use the new APIs. The following lessons cover the specific changes needed.</p>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Note:</strong> The underlying data model for sites is preserved during migration. Applications map 1:1 to previous site definitions.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "app-repository",
+                    ModuleId = "applications",
+                    Title = "IApplicationRepository",
+                    Summary = "Learn to perform CRUD operations on applications using the repository interface.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Use IApplicationRepository for application management",
+                        "Create, read, update, and delete applications",
+                        "Query applications programmatically"
+                    },
+                    Content = @"
+<h2>IApplicationRepository</h2>
+<p>The <code>IApplicationRepository</code> interface provides programmatic access to manage applications in CMS 13.</p>
+
+<h3>Interface Overview</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public interface IApplicationRepository
+{
+    // Query operations
+    Application Get(Guid id);
+    Application GetByName(string name);
+    IEnumerable&lt;Application&gt; List();
+
+    // Write operations
+    Guid Save(Application application);
+    void Delete(Guid id);
+}</code></pre>
+
+<h3>Injecting the Repository</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class ApplicationService
+{
+    private readonly IApplicationRepository _applicationRepository;
+
+    public ApplicationService(IApplicationRepository applicationRepository)
+    {
+        _applicationRepository = applicationRepository;
+    }
+}</code></pre>
+
+<h3>Listing All Applications</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public IEnumerable&lt;ApplicationInfo&gt; GetAllApplications()
+{
+    return _applicationRepository.List()
+        .Select(app => new ApplicationInfo
+        {
+            Id = app.Id,
+            Name = app.Name,
+            StartPageId = app.StartPage,
+            Hosts = app.Hosts.Select(h => h.Name).ToList()
+        });
+}</code></pre>
+
+<h3>Getting a Specific Application</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// By ID
+var application = _applicationRepository.Get(applicationId);
+
+// By name
+var application = _applicationRepository.GetByName(""corporate-site"");</code></pre>
+
+<h3>Creating a New Application</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public Guid CreateApplication(string name, ContentReference startPage)
+{
+    var application = new Application
+    {
+        Name = name,
+        StartPage = startPage,
+        Hosts = new List&lt;HostDefinition&gt;
+        {
+            new HostDefinition
+            {
+                Name = ""www.example.com"",
+                Type = HostDefinitionType.Primary
+            }
+        }
+    };
+
+    return _applicationRepository.Save(application);
+}</code></pre>
+
+<h3>Updating an Application</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public void UpdateApplicationHosts(Guid appId, IEnumerable&lt;string&gt; hostNames)
+{
+    var application = _applicationRepository.Get(appId);
+
+    application.Hosts = hostNames.Select(h => new HostDefinition
+    {
+        Name = h,
+        Type = HostDefinitionType.Primary
+    }).ToList();
+
+    _applicationRepository.Save(application);
+}</code></pre>
+
+<h3>Migration from ISiteDefinitionRepository</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">ISiteDefinitionRepository</th>
+            <th class=""px-4 py-2 text-left"">IApplicationRepository</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>Get(Guid id)</code></td><td class=""px-4 py-2""><code>Get(Guid id)</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>List()</code></td><td class=""px-4 py-2""><code>List()</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>Save(SiteDefinition)</code></td><td class=""px-4 py-2""><code>Save(Application)</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>Delete(Guid id)</code></td><td class=""px-4 py-2""><code>Delete(Guid id)</code></td></tr>
+    </tbody>
+</table>
+"
+                },
+                new Lesson
+                {
+                    Id = "app-resolver",
+                    ModuleId = "applications",
+                    Title = "IApplicationResolver",
+                    Summary = "Learn to resolve the current application context in requests.",
+                    Order = 3,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Use IApplicationResolver to get current application",
+                        "Understand context-based resolution",
+                        "Handle multi-tenant scenarios"
+                    },
+                    Content = @"
+<h2>IApplicationResolver</h2>
+<p>The <code>IApplicationResolver</code> service resolves the current application based on the HTTP request context, replacing <code>SiteDefinition.Current</code>.</p>
+
+<h3>Interface</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public interface IApplicationResolver
+{
+    Application GetCurrentApplication();
+    Application GetApplicationForRequest(HttpContext context);
+    Application GetApplicationByHost(string hostName);
+}</code></pre>
+
+<h3>Migration from SiteDefinition.Current</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
+var currentSite = SiteDefinition.Current;
+var startPage = currentSite.StartPage;
+
+// CMS 13
+public class MyController : Controller
+{
+    private readonly IApplicationResolver _applicationResolver;
+
+    public MyController(IApplicationResolver applicationResolver)
+    {
+        _applicationResolver = applicationResolver;
+    }
+
+    public IActionResult Index()
+    {
+        var currentApp = _applicationResolver.GetCurrentApplication();
+        var startPage = currentApp.StartPage;
+        // ...
+    }
+}</code></pre>
+
+<h3>Getting Current Application</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class NavigationService
+{
+    private readonly IApplicationResolver _resolver;
+    private readonly IContentLoader _contentLoader;
+
+    public NavigationService(
+        IApplicationResolver resolver,
+        IContentLoader contentLoader)
+    {
+        _resolver = resolver;
+        _contentLoader = contentLoader;
+    }
+
+    public IContent GetStartPage()
+    {
+        var app = _resolver.GetCurrentApplication();
+        return _contentLoader.Get&lt;IContent&gt;(app.StartPage);
+    }
+
+    public IEnumerable&lt;HostDefinition&gt; GetCurrentHosts()
+    {
+        return _resolver.GetCurrentApplication().Hosts;
+    }
+}</code></pre>
+
+<h3>Host-Based Resolution</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Resolve application by specific host
+var app = _applicationResolver.GetApplicationByHost(""www.corporate.com"");
+
+// Useful for:
+// - URL generation for different sites
+// - Cross-site content references
+// - Email templates with absolute URLs</code></pre>
+
+<h3>Multi-Tenant Scenarios</h3>
+<p>For SaaS or multi-tenant deployments:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class TenantService
+{
+    private readonly IApplicationResolver _resolver;
+
+    public string GetTenantIdentifier()
+    {
+        var app = _resolver.GetCurrentApplication();
+        return app.Name; // Or use a custom property
+    }
+
+    public bool IsCurrentTenant(string tenantId)
+    {
+        var app = _resolver.GetCurrentApplication();
+        return app.Name.Equals(tenantId, StringComparison.OrdinalIgnoreCase);
+    }
+}</code></pre>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
+    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Important:</strong> <code>GetCurrentApplication()</code> requires an active HTTP context. In background jobs or services without HTTP context, use <code>IApplicationRepository.List()</code> instead.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "app-configuration",
+                    ModuleId = "applications",
+                    Title = "Application Configuration",
+                    Summary = "Configure application settings, domains, and start pages.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Configure application hosts and domains",
+                        "Set start pages and root content",
+                        "Manage application-specific settings"
+                    },
+                    Content = @"
+<h2>Application Configuration</h2>
+<p>Applications in CMS 13 support rich configuration options for domains, content roots, and custom settings.</p>
+
+<h3>Application Properties</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Property</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>Id</code></td><td class=""px-4 py-2"">Unique identifier (GUID)</td></tr>
+        <tr><td class=""px-4 py-2""><code>Name</code></td><td class=""px-4 py-2"">Application name for identification</td></tr>
+        <tr><td class=""px-4 py-2""><code>StartPage</code></td><td class=""px-4 py-2"">ContentReference to the start page</td></tr>
+        <tr><td class=""px-4 py-2""><code>ContentRootId</code></td><td class=""px-4 py-2"">Root content folder reference</td></tr>
+        <tr><td class=""px-4 py-2""><code>Hosts</code></td><td class=""px-4 py-2"">Collection of host definitions</td></tr>
+        <tr><td class=""px-4 py-2""><code>AssetsRootId</code></td><td class=""px-4 py-2"">Root folder for media assets</td></tr>
+    </tbody>
+</table>
+
+<h3>Host Configuration</h3>
+<p>Configure domains and hosts for your application:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>var application = new Application
+{
+    Name = ""Corporate Site"",
+    StartPage = startPageReference,
+    Hosts = new List&lt;HostDefinition&gt;
+    {
+        new HostDefinition
+        {
+            Name = ""www.corporate.com"",
+            Type = HostDefinitionType.Primary,
+            UseSecureConnection = true
+        },
+        new HostDefinition
+        {
+            Name = ""corporate.com"",
+            Type = HostDefinitionType.Redirect,
+            UseSecureConnection = true
+        },
+        new HostDefinition
+        {
+            Name = ""*"",
+            Type = HostDefinitionType.Undefined // Wildcard
+        }
+    }
+};</code></pre>
+
+<h3>Host Definition Types</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Type</th>
+            <th class=""px-4 py-2 text-left"">Purpose</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>Primary</code></td><td class=""px-4 py-2"">Main host used for canonical URLs</td></tr>
+        <tr><td class=""px-4 py-2""><code>Redirect</code></td><td class=""px-4 py-2"">Redirects to primary host</td></tr>
+        <tr><td class=""px-4 py-2""><code>Edit</code></td><td class=""px-4 py-2"">Host used for editing context</td></tr>
+        <tr><td class=""px-4 py-2""><code>Undefined</code></td><td class=""px-4 py-2"">Wildcard matching</td></tr>
+    </tbody>
+</table>
+
+<h3>Language Configuration</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Configure host-specific languages
+var host = new HostDefinition
+{
+    Name = ""www.corporate.de"",
+    Type = HostDefinitionType.Primary,
+    Language = new CultureInfo(""de-DE"")
+};</code></pre>
+
+<h3>Admin UI Configuration</h3>
+<p>Applications can also be configured through the Admin UI:</p>
+<ol>
+    <li>Navigate to <strong>Admin &gt; Config &gt; Manage Applications</strong></li>
+    <li>Select an existing application or create new</li>
+    <li>Configure hosts, start page, and settings</li>
+    <li>Save changes</li>
+</ol>
+
+<h3>Programmatic Settings Access</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class ApplicationSettingsService
+{
+    private readonly IApplicationResolver _resolver;
+
+    public bool IsSecureConnectionRequired()
+    {
+        var app = _resolver.GetCurrentApplication();
+        var primaryHost = app.Hosts
+            .FirstOrDefault(h => h.Type == HostDefinitionType.Primary);
+
+        return primaryHost?.UseSecureConnection ?? false;
+    }
+
+    public string GetPrimaryHostUrl()
+    {
+        var app = _resolver.GetCurrentApplication();
+        var primaryHost = app.Hosts
+            .FirstOrDefault(h => h.Type == HostDefinitionType.Primary);
+
+        var scheme = primaryHost?.UseSecureConnection == true ? ""https"" : ""http"";
+        return $""{scheme}://{primaryHost?.Name}"";
+    }
+}</code></pre>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Best Practice:</strong> Use the Primary host type for your main domain and configure redirects for alternative domains (www vs non-www, old domains, etc.).</p>
+</div>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 10: Preview for Headless Sites
+
+    private LearningModule BuildHeadlessPreviewModule()
+    {
+        return new LearningModule
+        {
+            Id = "headless-preview",
+            Title = "Preview for Headless Sites",
+            Description = "Configure and use preview functionality for decoupled frontend applications.",
+            Icon = "device-phone-mobile",
+            Order = 10,
+            Difficulty = ModuleDifficulty.Advanced,
+            Prerequisites = new[] { "graph-integration" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "hp-overview",
+                    ModuleId = "headless-preview",
+                    Title = "Headless Preview Overview",
+                    Summary = "Understand the preview architecture for decoupled frontend applications.",
+                    Order = 1,
+                    EstimatedMinutes = 8,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand headless preview architecture",
+                        "Learn how Graph enables preview for decoupled sites",
+                        "Identify preview requirements for your frontend"
+                    },
+                    Content = @"
+<h2>Headless Preview Overview</h2>
+<p>CMS 13 introduces robust preview capabilities for headless architectures, enabling content editors to preview changes in decoupled frontend applications.</p>
+
+<h3>The Headless Challenge</h3>
+<p>In traditional CMS architectures, preview is straightforward—the CMS renders the page. In headless setups:</p>
+<ul>
+    <li>Content lives in the CMS</li>
+    <li>Rendering happens in a separate frontend application</li>
+    <li>Preview requires coordination between systems</li>
+</ul>
+
+<h3>CMS 13 Preview Architecture</h3>
+<p>CMS 13 solves this with a Graph-based approach:</p>
+
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Component</th>
+            <th class=""px-4 py-2 text-left"">Role</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">CMS</td><td class=""px-4 py-2"">Stores content, provides edit UI, triggers preview</td></tr>
+        <tr><td class=""px-4 py-2"">Optimizely Graph</td><td class=""px-4 py-2"">Indexes draft content, serves preview queries</td></tr>
+        <tr><td class=""px-4 py-2"">Frontend</td><td class=""px-4 py-2"">Fetches from Graph, renders preview</td></tr>
+        <tr><td class=""px-4 py-2"">Visual Builder</td><td class=""px-4 py-2"">Orchestrates preview in iframe</td></tr>
+    </tbody>
+</table>
+
+<h3>Preview Flow</h3>
+<ol>
+    <li><strong>Editor makes changes</strong> in the CMS</li>
+    <li><strong>Draft is indexed</strong> to Graph (including unpublished content)</li>
+    <li><strong>Preview triggers</strong> - CMS constructs preview URL</li>
+    <li><strong>Frontend receives request</strong> with preview token</li>
+    <li><strong>Frontend queries Graph</strong> for draft content</li>
+    <li><strong>Preview renders</strong> in Visual Builder iframe</li>
+</ol>
+
+<h3>Key Capabilities</h3>
+<ul>
+    <li><strong>Draft preview</strong> - View unpublished content changes</li>
+    <li><strong>Variations preview</strong> - Preview content variations</li>
+    <li><strong>Cross-origin support</strong> - Frontend can be on different domain</li>
+    <li><strong>Secure access</strong> - Preview tokens authenticate requests</li>
+</ul>
+
+<h3>Requirements</h3>
+<p>To enable headless preview:</p>
+<ul>
+    <li>Optimizely Graph integration configured</li>
+    <li>Frontend capable of receiving preview requests</li>
+    <li>Preview URL patterns configured in CMS</li>
+    <li>CORS policies allowing CMS-to-frontend communication</li>
+</ul>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Note:</strong> Headless preview works with any frontend framework (Next.js, Nuxt, Gatsby, etc.) that can query Optimizely Graph.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "hp-urls",
+                    ModuleId = "headless-preview",
+                    Title = "Configuring Preview URLs",
+                    Summary = "Set up preview URL patterns for your headless frontend.",
+                    Order = 2,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Configure preview URL patterns",
+                        "Implement preview endpoints in your frontend",
+                        "Handle authentication for preview requests"
+                    },
+                    Content = @"
+<h2>Configuring Preview URLs</h2>
+<p>Preview URL configuration tells CMS 13 how to construct URLs that your frontend application will handle for preview rendering.</p>
+
+<h3>Preview URL Pattern</h3>
+<p>Configure in your application settings:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+  ""Optimizely"": {
+    ""Preview"": {
+      ""BaseUrl"": ""https://frontend.example.com"",
+      ""PreviewPath"": ""/api/preview"",
+      ""ExitPreviewPath"": ""/api/exit-preview""
+    }
+  }
+}</code></pre>
+
+<h3>URL Construction</h3>
+<p>CMS 13 constructs preview URLs with these parameters:</p>
+
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Parameter</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>token</code></td><td class=""px-4 py-2"">Encrypted preview authentication token</td></tr>
+        <tr><td class=""px-4 py-2""><code>contentId</code></td><td class=""px-4 py-2"">Content GUID being previewed</td></tr>
+        <tr><td class=""px-4 py-2""><code>locale</code></td><td class=""px-4 py-2"">Language code for the content</td></tr>
+        <tr><td class=""px-4 py-2""><code>variation</code></td><td class=""px-4 py-2"">Variation key (if previewing a variation)</td></tr>
+    </tbody>
+</table>
+
+<h3>Example Preview URL</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>https://frontend.example.com/api/preview?
+  token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  &amp;contentId=a1b2c3d4-5678-90ab-cdef-123456789abc
+  &amp;locale=en
+  &amp;variation=experiment-v1</code></pre>
+
+<h3>Frontend Preview Handler (Next.js Example)</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// pages/api/preview.ts
+import { NextApiRequest, NextApiResponse } from 'next';
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const { token, contentId, locale, variation } = req.query;
+
+  // Validate token with CMS
+  const isValid = await validatePreviewToken(token as string);
+  if (!isValid) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+
+  // Enable preview mode
+  res.setPreviewData({
+    contentId,
+    locale,
+    variation,
+    token
+  });
+
+  // Redirect to the content page
+  const path = await resolveContentPath(contentId as string);
+  res.redirect(path);
+}</code></pre>
+
+<h3>Token Validation</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Validate token against CMS endpoint
+async function validatePreviewToken(token: string): Promise&lt;boolean&gt; {
+  const response = await fetch(
+    `${process.env.CMS_URL}/api/preview/validate`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    }
+  );
+  return response.ok;
+}</code></pre>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
+    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Security Note:</strong> Always validate preview tokens server-side. Never expose draft content without proper authentication.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "hp-visual-builder",
+                    ModuleId = "headless-preview",
+                    Title = "Preview in Visual Builder",
+                    Summary = "Integrate your headless frontend preview with Visual Builder.",
+                    Order = 3,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Display headless preview in Visual Builder iframe",
+                        "Handle cross-origin communication",
+                        "Implement live preview updates"
+                    },
+                    Content = @"
+<h2>Preview in Visual Builder</h2>
+<p>Visual Builder displays your headless frontend in an iframe, enabling editors to see changes as they make them.</p>
+
+<h3>Iframe Integration</h3>
+<p>Visual Builder loads your frontend preview in an iframe:</p>
+<ul>
+    <li>Preview URL is loaded with authentication token</li>
+    <li>Frontend renders content from Graph</li>
+    <li>Changes sync through Graph in near real-time</li>
+</ul>
+
+<h3>Cross-Origin Configuration</h3>
+<p>Your frontend needs proper CORS and frame policies:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// next.config.js (Next.js)
+module.exports = {
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'ALLOW-FROM https://cms.example.com'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: 'frame-ancestors https://cms.example.com'
+          }
+        ]
+      }
+    ];
+  }
+};</code></pre>
+
+<h3>Communication Protocol</h3>
+<p>Visual Builder and your frontend communicate via <code>postMessage</code>:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Frontend: Listen for CMS messages
+window.addEventListener('message', (event) => {
+  // Verify origin
+  if (event.origin !== process.env.CMS_URL) return;
+
+  const { type, payload } = event.data;
+
+  switch (type) {
+    case 'content-updated':
+      // Refetch content from Graph
+      refreshContent(payload.contentId);
+      break;
+    case 'navigate':
+      // Navigate to different content
+      router.push(payload.path);
+      break;
+  }
+});
+
+// Frontend: Notify CMS of ready state
+window.parent.postMessage({
+  type: 'preview-ready',
+  payload: { contentId: currentContent.id }
+}, process.env.CMS_URL);</code></pre>
+
+<h3>Live Preview Updates</h3>
+<p>For real-time updates as editors type:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Poll Graph for changes (simple approach)
+useEffect(() => {
+  if (!previewMode) return;
+
+  const interval = setInterval(async () => {
+    const updatedContent = await fetchFromGraph(contentId);
+    if (updatedContent.version !== content.version) {
+      setContent(updatedContent);
+    }
+  }, 2000); // Poll every 2 seconds
+
+  return () => clearInterval(interval);
+}, [previewMode, contentId]);</code></pre>
+
+<h3>Best Practices</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Practice</th>
+            <th class=""px-4 py-2 text-left"">Recommendation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Authentication</td><td class=""px-4 py-2"">Always validate preview tokens server-side</td></tr>
+        <tr><td class=""px-4 py-2"">Caching</td><td class=""px-4 py-2"">Disable caching in preview mode</td></tr>
+        <tr><td class=""px-4 py-2"">Error handling</td><td class=""px-4 py-2"">Show friendly errors if content fails to load</td></tr>
+        <tr><td class=""px-4 py-2"">Performance</td><td class=""px-4 py-2"">Optimize Graph queries for preview</td></tr>
+    </tbody>
+</table>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Tip:</strong> Add a visual indicator in your frontend when in preview mode, so editors know they're viewing draft content.</p>
+</div>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 11: Smooth Rebuild
+
+    private LearningModule BuildSmoothRebuildModule()
+    {
+        return new LearningModule
+        {
+            Id = "smooth-rebuild",
+            Title = "Smooth Rebuild",
+            Description = "Reset and rebuild Graph sources without downtime using deployment slots.",
+            Icon = "arrow-path-rounded-square",
+            Order = 11,
+            Difficulty = ModuleDifficulty.Advanced,
+            Prerequisites = new[] { "graph-integration" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "sr-overview",
+                    ModuleId = "smooth-rebuild",
+                    Title = "Understanding Smooth Rebuild",
+                    Summary = "Learn how Smooth Rebuild enables zero-downtime Graph reindexing.",
+                    Order = 1,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand the purpose of Smooth Rebuild",
+                        "Learn how deployment slots work",
+                        "Identify when to use Smooth Rebuild"
+                    },
+                    Content = @"
+<h2>Understanding Smooth Rebuild</h2>
+<p>Smooth Rebuild is a CMS 13 feature that allows you to reset your Optimizely Graph source and reindex all content <strong>without any downtime</strong> for your live site.</p>
+
+<h3>Why Smooth Rebuild?</h3>
+<p>There are scenarios where you need to completely rebuild your Graph index:</p>
+<ul>
+    <li><strong>Schema changes</strong> - Adding or modifying content types</li>
+    <li><strong>Index corruption</strong> - Recovering from data inconsistencies</li>
+    <li><strong>Configuration updates</strong> - Changes to indexing behavior</li>
+    <li><strong>Major upgrades</strong> - After significant CMS updates</li>
+</ul>
+
+<h3>The Traditional Problem</h3>
+<p>Without Smooth Rebuild, reindexing would cause:</p>
+<ul>
+    <li>Missing content in search results during rebuild</li>
+    <li>Broken pages relying on Graph queries</li>
+    <li>Need for maintenance windows</li>
+    <li>Editor confusion about missing content</li>
+</ul>
+
+<h3>How Smooth Rebuild Works</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Step</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+            <th class=""px-4 py-2 text-left"">Live Traffic</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">1. Create Slot</td><td class=""px-4 py-2"">New deployment slot created</td><td class=""px-4 py-2"">Served from original</td></tr>
+        <tr><td class=""px-4 py-2"">2. Rebuild</td><td class=""px-4 py-2"">Content indexed to new slot</td><td class=""px-4 py-2"">Served from original</td></tr>
+        <tr><td class=""px-4 py-2"">3. Verify</td><td class=""px-4 py-2"">Test new slot content</td><td class=""px-4 py-2"">Served from original</td></tr>
+        <tr><td class=""px-4 py-2"">4. Commit</td><td class=""px-4 py-2"">Switch traffic to new slot</td><td class=""px-4 py-2"">Served from new slot</td></tr>
+    </tbody>
+</table>
+
+<h3>Deployment Slots</h3>
+<p>Deployment slots are isolated environments for your Graph source:</p>
+<ul>
+    <li><strong>Independent index</strong> - Complete copy of your content</li>
+    <li><strong>Isolated changes</strong> - Modifications don't affect live traffic</li>
+    <li><strong>Instant switching</strong> - Traffic switches atomically</li>
+    <li><strong>Rollback capable</strong> - Can abandon slot without impact</li>
+</ul>
+
+<h3>When to Use Smooth Rebuild</h3>
+<ul>
+    <li>After content type schema changes</li>
+    <li>When search results seem incomplete</li>
+    <li>After major CMS or Graph updates</li>
+    <li>When troubleshooting indexing issues</li>
+    <li>As part of deployment pipelines</li>
+</ul>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
+    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Pre-Release Note:</strong> Smooth Rebuild has not been fully enabled yet in the CMS 13 pre-release. It will be available following the Graph team's official release.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "sr-slots",
+                    ModuleId = "smooth-rebuild",
+                    Title = "Creating and Managing Slots",
+                    Summary = "Learn the workflow for creating, verifying, and committing deployment slots.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Create a new deployment slot",
+                        "Monitor rebuild progress",
+                        "Commit or abandon slots"
+                    },
+                    Content = @"
+<h2>Creating and Managing Slots</h2>
+<p>Learn the complete workflow for managing deployment slots in Smooth Rebuild.</p>
+
+<h3>Accessing Smooth Rebuild</h3>
+<p>Navigate to the Smooth Rebuild interface:</p>
+<ol>
+    <li>Go to <strong>Admin</strong> in the CMS</li>
+    <li>Select <strong>Config</strong> &gt; <strong>Optimizely Graph</strong></li>
+    <li>Click <strong>Smooth Rebuild</strong></li>
+</ol>
+
+<h3>Creating a Deployment Slot</h3>
+<p>To initiate a smooth rebuild:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Programmatic slot creation
+public class SmoothRebuildService
+{
+    private readonly IGraphSyncService _graphSync;
+
+    public async Task&lt;string&gt; CreateRebuildSlot()
+    {
+        var slot = await _graphSync.CreateDeploymentSlot();
+        return slot.SlotId;
+    }
+}</code></pre>
+
+<h3>Monitoring Progress</h3>
+<p>Track the rebuild status:</p>
+
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Status</th>
+            <th class=""px-4 py-2 text-left"">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>Creating</code></td><td class=""px-4 py-2"">Slot is being initialized</td></tr>
+        <tr><td class=""px-4 py-2""><code>Indexing</code></td><td class=""px-4 py-2"">Content is being indexed to slot</td></tr>
+        <tr><td class=""px-4 py-2""><code>Ready</code></td><td class=""px-4 py-2"">Rebuild complete, ready for verification</td></tr>
+        <tr><td class=""px-4 py-2""><code>Committing</code></td><td class=""px-4 py-2"">Traffic switching in progress</td></tr>
+        <tr><td class=""px-4 py-2""><code>Active</code></td><td class=""px-4 py-2"">Slot is now serving live traffic</td></tr>
+    </tbody>
+</table>
+
+<h3>Progress Metrics</h3>
+<p>The interface displays real-time metrics:</p>
+<ul>
+    <li>Total content items to index</li>
+    <li>Items processed</li>
+    <li>Percentage complete</li>
+    <li>Estimated time remaining</li>
+    <li>Error count</li>
+</ul>
+
+<h3>Verifying the Slot</h3>
+<p>Before committing, verify the slot content:</p>
+<ul>
+    <li>Query the slot directly using the preview endpoint</li>
+    <li>Check content counts match expected numbers</li>
+    <li>Test critical search queries</li>
+    <li>Verify all content types are indexed</li>
+</ul>
+
+<h3>Committing a Slot</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Commit the slot to go live
+await _graphSync.CommitDeploymentSlot(slotId);
+
+// Traffic now served from new slot</code></pre>
+
+<h3>Abandoning a Slot</h3>
+<p>If something is wrong, abandon without impact:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Abandon slot (no effect on live traffic)
+await _graphSync.AbandonDeploymentSlot(slotId);
+
+// Original index continues serving traffic</code></pre>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Best Practice:</strong> Always verify content counts and test critical queries before committing a slot to production.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "sr-strategies",
+                    ModuleId = "smooth-rebuild",
+                    Title = "Rebuild Strategies",
+                    Summary = "Learn best practices and strategies for effective smooth rebuilds.",
+                    Order = 3,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Plan rebuild timing and resources",
+                        "Handle large content repositories",
+                        "Integrate with deployment pipelines"
+                    },
+                    Content = @"
+<h2>Rebuild Strategies</h2>
+<p>Effective smooth rebuild strategies help minimize risk and optimize performance.</p>
+
+<h3>Planning Your Rebuild</h3>
+<p>Consider these factors before starting:</p>
+
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Factor</th>
+            <th class=""px-4 py-2 text-left"">Consideration</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Content volume</td><td class=""px-4 py-2"">Larger sites take longer to rebuild</td></tr>
+        <tr><td class=""px-4 py-2"">Content complexity</td><td class=""px-4 py-2"">Rich media and nested blocks add time</td></tr>
+        <tr><td class=""px-4 py-2"">Traffic patterns</td><td class=""px-4 py-2"">Consider peak usage when committing</td></tr>
+        <tr><td class=""px-4 py-2"">Editor activity</td><td class=""px-4 py-2"">New content during rebuild goes to both</td></tr>
+    </tbody>
+</table>
+
+<h3>Large Repository Strategies</h3>
+<p>For sites with tens of thousands of content items:</p>
+<ul>
+    <li><strong>Off-peak timing</strong> - Start rebuilds during low-traffic periods</li>
+    <li><strong>Batch processing</strong> - System automatically batches for efficiency</li>
+    <li><strong>Monitor resources</strong> - Watch CMS server performance during rebuild</li>
+    <li><strong>Allow sufficient time</strong> - Don't rush to commit; verify thoroughly</li>
+</ul>
+
+<h3>Content Changes During Rebuild</h3>
+<p>Content published during a rebuild:</p>
+<ul>
+    <li>Goes to the <strong>live index</strong> immediately (for current traffic)</li>
+    <li>Goes to the <strong>rebuilding slot</strong> as well</li>
+    <li>No content is lost or delayed</li>
+</ul>
+
+<h3>CI/CD Integration</h3>
+<p>Automate smooth rebuilds in your deployment pipeline:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code># Azure DevOps pipeline example
+stages:
+  - stage: Deploy
+    jobs:
+      - job: DeployCMS
+        steps:
+          - script: dotnet publish
+          - task: Deploy@1
+
+      - job: RebuildGraph
+        dependsOn: DeployCMS
+        steps:
+          - script: |
+              # Create slot
+              SLOT_ID=$(curl -X POST $CMS_URL/api/graph/slots)
+
+              # Wait for completion
+              while [ ""$(curl $CMS_URL/api/graph/slots/$SLOT_ID/status)"" != ""Ready"" ]; do
+                sleep 30
+              done
+
+              # Verify content count
+              COUNT=$(curl $CMS_URL/api/graph/slots/$SLOT_ID/count)
+              if [ $COUNT -lt $MIN_EXPECTED ]; then
+                curl -X DELETE $CMS_URL/api/graph/slots/$SLOT_ID
+                exit 1
+              fi
+
+              # Commit
+              curl -X POST $CMS_URL/api/graph/slots/$SLOT_ID/commit</code></pre>
+
+<h3>Troubleshooting</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Issue</th>
+            <th class=""px-4 py-2 text-left"">Resolution</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Rebuild stuck</td><td class=""px-4 py-2"">Check server logs, may need to abandon and retry</td></tr>
+        <tr><td class=""px-4 py-2"">Missing content</td><td class=""px-4 py-2"">Verify content type indexing configuration</td></tr>
+        <tr><td class=""px-4 py-2"">High error count</td><td class=""px-4 py-2"">Review error details, fix content issues</td></tr>
+        <tr><td class=""px-4 py-2"">Slow progress</td><td class=""px-4 py-2"">Expected for large sites; monitor resources</td></tr>
+    </tbody>
+</table>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Success Pattern:</strong> Schedule smooth rebuilds during off-peak hours, allow ample time for completion and verification, and always have a rollback plan (abandon) ready.</p>
+</div>
+"
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    #region Module 12: CMS 12 to CMS 13 Migration
+
+    private LearningModule BuildMigrationModule()
+    {
+        return new LearningModule
+        {
+            Id = "migration-12-to-13",
+            Title = "CMS 12 to CMS 13 Migration",
+            Description = "Comprehensive guide to upgrading from CMS 12 to CMS 13.",
+            Icon = "arrow-up-circle",
+            Order = 12,
+            Difficulty = ModuleDifficulty.Advanced,
+            Prerequisites = new[] { "overview", "framework" },
+            Lessons = new List<Lesson>
+            {
+                new Lesson
+                {
+                    Id = "mig-overview",
+                    ModuleId = "migration-12-to-13",
+                    Title = "Migration Overview",
+                    Summary = "Understand the scope and planning required for CMS 12 to CMS 13 migration.",
+                    Order = 1,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Understand breaking changes in CMS 13",
+                        "Assess migration complexity for your project",
+                        "Plan your migration approach"
+                    },
+                    Content = @"
+<h2>Migration Overview</h2>
+<p>Migrating from CMS 12 to CMS 13 requires careful planning due to significant architectural changes.</p>
+
+<h3>Key Breaking Changes Summary</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Area</th>
+            <th class=""px-4 py-2 text-left"">Change</th>
+            <th class=""px-4 py-2 text-left"">Impact</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Runtime</td><td class=""px-4 py-2"">.NET 10 required</td><td class=""px-4 py-2"">High</td></tr>
+        <tr><td class=""px-4 py-2"">Graph</td><td class=""px-4 py-2"">Mandatory integration</td><td class=""px-4 py-2"">High</td></tr>
+        <tr><td class=""px-4 py-2"">Sites</td><td class=""px-4 py-2"">SiteDefinition → Application</td><td class=""px-4 py-2"">Medium</td></tr>
+        <tr><td class=""px-4 py-2"">References</td><td class=""px-4 py-2"">PageReference deprecated</td><td class=""px-4 py-2"">Medium</td></tr>
+        <tr><td class=""px-4 py-2"">DI</td><td class=""px-4 py-2"">ServiceLocator deprecated</td><td class=""px-4 py-2"">Medium</td></tr>
+        <tr><td class=""px-4 py-2"">Projects</td><td class=""px-4 py-2"">Must be disabled</td><td class=""px-4 py-2"">High (if used)</td></tr>
+        <tr><td class=""px-4 py-2"">On-Page Edit</td><td class=""px-4 py-2"">Disabled, Visual Builder only</td><td class=""px-4 py-2"">Medium</td></tr>
+    </tbody>
+</table>
+
+<h3>Pre-Migration Assessment</h3>
+<p>Before starting, assess your project:</p>
+<ol>
+    <li><strong>Third-party packages</strong> - Check compatibility with .NET 10 and CMS 13</li>
+    <li><strong>Custom code</strong> - Identify ServiceLocator and PageReference usage</li>
+    <li><strong>Projects feature</strong> - Determine if you rely on Projects for workflows</li>
+    <li><strong>Search implementation</strong> - Plan for mandatory Graph integration</li>
+    <li><strong>Site definitions</strong> - Document current SiteDefinition configurations</li>
+</ol>
+
+<h3>Migration Phases</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Phase</th>
+            <th class=""px-4 py-2 text-left"">Activities</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">1. Preparation</td><td class=""px-4 py-2"">Backup, assessment, dependency audit</td></tr>
+        <tr><td class=""px-4 py-2"">2. Framework Update</td><td class=""px-4 py-2"">.NET 10, NuGet packages</td></tr>
+        <tr><td class=""px-4 py-2"">3. Code Migration</td><td class=""px-4 py-2"">API updates, deprecated code fixes</td></tr>
+        <tr><td class=""px-4 py-2"">4. Graph Setup</td><td class=""px-4 py-2"">Configure and test Graph integration</td></tr>
+        <tr><td class=""px-4 py-2"">5. Feature Updates</td><td class=""px-4 py-2"">Remove Projects, update editors</td></tr>
+        <tr><td class=""px-4 py-2"">6. Testing</td><td class=""px-4 py-2"">Comprehensive validation</td></tr>
+    </tbody>
+</table>
+
+<h3>Risk Mitigation</h3>
+<ul>
+    <li><strong>Environment isolation</strong> - Migrate in a separate environment first</li>
+    <li><strong>Database backup</strong> - Full backup before any migration steps</li>
+    <li><strong>Rollback plan</strong> - Document how to revert if needed</li>
+    <li><strong>Staged rollout</strong> - Consider migrating dev → staging → production</li>
+</ul>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
+    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Important:</strong> CMS 13 is currently in pre-release. Plan your migration timeline to account for the final GA release.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "mig-dotnet",
+                    ModuleId = "migration-12-to-13",
+                    Title = ".NET 10 and Package Updates",
+                    Summary = "Upgrade your project to .NET 10 and update NuGet packages.",
+                    Order = 2,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Update project files to .NET 10",
+                        "Upgrade Optimizely NuGet packages",
+                        "Resolve dependency conflicts"
+                    },
+                    Content = @"
+<h2>.NET 10 and Package Updates</h2>
+<p>The first technical step in migration is upgrading to .NET 10 and updating all packages.</p>
+
+<h3>Update Project File</h3>
+<p>Modify your <code>.csproj</code> file:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>&lt;Project Sdk=""Microsoft.NET.Sdk.Web""&gt;
+  &lt;PropertyGroup&gt;
+    &lt;!-- CMS 12 --&gt;
+    &lt;!-- &lt;TargetFramework&gt;net6.0&lt;/TargetFramework&gt; --&gt;
+    &lt;!-- &lt;TargetFramework&gt;net8.0&lt;/TargetFramework&gt; --&gt;
+
+    &lt;!-- CMS 13 --&gt;
+    &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;</code></pre>
+
+<h3>Install .NET 10 SDK</h3>
+<p>Ensure your development environment has .NET 10:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code># Check current SDK version
+dotnet --version
+
+# Download .NET 10 SDK from Microsoft
+# https://dotnet.microsoft.com/download/dotnet/10.0</code></pre>
+
+<h3>Update NuGet Packages</h3>
+<p>Update Optimizely packages to CMS 13 versions:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>&lt;ItemGroup&gt;
+  &lt;!-- Core CMS packages --&gt;
+  &lt;PackageReference Include=""EPiServer.CMS"" Version=""13.0.0"" /&gt;
+  &lt;PackageReference Include=""EPiServer.CMS.AspNetCore"" Version=""13.0.0"" /&gt;
+  &lt;PackageReference Include=""EPiServer.CMS.UI"" Version=""13.0.0"" /&gt;
+
+  &lt;!-- Required Graph packages --&gt;
+  &lt;PackageReference Include=""EPiServer.ContentGraph"" Version=""13.0.0"" /&gt;
+  &lt;PackageReference Include=""EPiServer.ContentGraph.CMS"" Version=""13.0.0"" /&gt;
+&lt;/ItemGroup&gt;</code></pre>
+
+<h3>Package Update Commands</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code># Update all Optimizely packages
+dotnet add package EPiServer.CMS --version 13.0.0
+dotnet add package EPiServer.CMS.AspNetCore --version 13.0.0
+dotnet add package EPiServer.CMS.UI --version 13.0.0
+dotnet add package EPiServer.ContentGraph --version 13.0.0
+dotnet add package EPiServer.ContentGraph.CMS --version 13.0.0
+
+# Or update all packages at once
+dotnet restore</code></pre>
+
+<h3>Common Dependency Issues</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Issue</th>
+            <th class=""px-4 py-2 text-left"">Resolution</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Version conflicts</td><td class=""px-4 py-2"">Use consistent package versions across all EPiServer packages</td></tr>
+        <tr><td class=""px-4 py-2"">Third-party incompatibility</td><td class=""px-4 py-2"">Check for .NET 10 compatible versions or alternatives</td></tr>
+        <tr><td class=""px-4 py-2"">Missing dependencies</td><td class=""px-4 py-2"">Run <code>dotnet restore</code> to resolve transitive dependencies</td></tr>
+    </tbody>
+</table>
+
+<h3>global.json Configuration</h3>
+<p>Pin your SDK version for consistent builds:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+  ""sdk"": {
+    ""version"": ""10.0.100"",
+    ""rollForward"": ""latestMinor""
+  }
+}</code></pre>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Tip:</strong> After updating packages, build the project to identify any compilation errors before proceeding to code migration.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "mig-applications",
+                    ModuleId = "migration-12-to-13",
+                    Title = "SiteDefinition to Application Migration",
+                    Summary = "Update your code from SiteDefinition APIs to the new Application model.",
+                    Order = 3,
+                    EstimatedMinutes = 12,
+                    LearningObjectives = new List<string>
+                    {
+                        "Replace SiteDefinition with Application APIs",
+                        "Update ISiteDefinitionRepository usage",
+                        "Migrate SiteDefinition.Current patterns"
+                    },
+                    Content = @"
+<h2>SiteDefinition to Application Migration</h2>
+<p>The <code>SiteDefinition</code> concept has been replaced by <code>Application</code> in CMS 13. This requires updating your code.</p>
+
+<h3>API Mapping</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">CMS 12</th>
+            <th class=""px-4 py-2 text-left"">CMS 13</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>SiteDefinition</code></td><td class=""px-4 py-2""><code>Application</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>ISiteDefinitionRepository</code></td><td class=""px-4 py-2""><code>IApplicationRepository</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>SiteDefinition.Current</code></td><td class=""px-4 py-2""><code>IApplicationResolver.GetCurrentApplication()</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>SiteDefinitionResolver</code></td><td class=""px-4 py-2""><code>IApplicationResolver</code></td></tr>
+    </tbody>
+</table>
+
+<h3>Migration Example: Static Access</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 - Static access (deprecated)
+public class NavigationHelper
+{
+    public ContentReference GetStartPage()
+    {
+        return SiteDefinition.Current.StartPage;
+    }
+}
+
+// CMS 13 - Dependency injection
+public class NavigationHelper
+{
+    private readonly IApplicationResolver _resolver;
+
+    public NavigationHelper(IApplicationResolver resolver)
+    {
+        _resolver = resolver;
+    }
+
+    public ContentReference GetStartPage()
+    {
+        return _resolver.GetCurrentApplication().StartPage;
+    }
+}</code></pre>
+
+<h3>Migration Example: Repository</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
+public class SiteService
+{
+    private readonly ISiteDefinitionRepository _siteRepo;
+
+    public IEnumerable&lt;SiteDefinition&gt; GetAllSites()
+    {
+        return _siteRepo.List();
+    }
+}
+
+// CMS 13
+public class SiteService
+{
+    private readonly IApplicationRepository _appRepo;
+
+    public IEnumerable&lt;Application&gt; GetAllSites()
+    {
+        return _appRepo.List();
+    }
+}</code></pre>
+
+<h3>Property Mapping</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">SiteDefinition Property</th>
+            <th class=""px-4 py-2 text-left"">Application Property</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>StartPage</code></td><td class=""px-4 py-2""><code>StartPage</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>Name</code></td><td class=""px-4 py-2""><code>Name</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>Id</code></td><td class=""px-4 py-2""><code>Id</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>Hosts</code></td><td class=""px-4 py-2""><code>Hosts</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>SiteAssetsRoot</code></td><td class=""px-4 py-2""><code>AssetsRootId</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>ContentAssetsRoot</code></td><td class=""px-4 py-2""><code>ContentRootId</code></td></tr>
+    </tbody>
+</table>
+
+<h3>Search and Replace Patterns</h3>
+<p>Use your IDE's search and replace:</p>
+<ul>
+    <li><code>SiteDefinition.Current</code> → Requires refactoring to inject <code>IApplicationResolver</code></li>
+    <li><code>ISiteDefinitionRepository</code> → <code>IApplicationRepository</code></li>
+    <li><code>SiteDefinition</code> → <code>Application</code> (in type declarations)</li>
+</ul>
+
+<h3>Multi-Site Considerations</h3>
+<p>If you have multiple sites:</p>
+<ul>
+    <li>Data is migrated automatically during upgrade</li>
+    <li>Site-to-Application mapping is 1:1</li>
+    <li>Host bindings are preserved</li>
+    <li>Start pages and asset roots remain unchanged</li>
+</ul>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
+    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Note:</strong> The static <code>SiteDefinition.Current</code> pattern cannot be directly replaced. You must refactor to use dependency injection with <code>IApplicationResolver</code>.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "mig-graph",
+                    ModuleId = "migration-12-to-13",
+                    Title = "Graph Integration Requirements",
+                    Summary = "Set up mandatory Optimizely Graph integration for CMS 13.",
+                    Order = 4,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Configure Graph integration from scratch",
+                        "Obtain Graph credentials from DXP Portal",
+                        "Verify Graph connectivity"
+                    },
+                    Content = @"
+<h2>Graph Integration Requirements</h2>
+<p>Optimizely Graph is <strong>mandatory</strong> in CMS 13. You must configure it for the CMS to function.</p>
+
+<h3>Why Graph is Required</h3>
+<ul>
+    <li><strong>Content Manager</strong> - Uses Graph for its search-first interface</li>
+    <li><strong>Internal retrieval</strong> - CMS uses Graph internally</li>
+    <li><strong>Visual Builder</strong> - Relies on Graph for content delivery</li>
+</ul>
+
+<h3>Step 1: Enable Graph in DXP Portal</h3>
+<ol>
+    <li>Log in to the DXP Portal</li>
+    <li>Navigate to your environment</li>
+    <li>Go to the <strong>API</strong> tab</li>
+    <li>Enable the <strong>Graph Service</strong></li>
+    <li>Copy your authentication keys</li>
+</ol>
+
+<h3>Step 2: Configure appsettings.json</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+  ""Optimizely"": {
+    ""Graph"": {
+      ""GatewayAddress"": ""https://graph.optimizely.com"",
+      ""SingleKey"": ""your-single-key-here"",
+      ""AppKey"": ""your-app-key-here"",
+      ""Secret"": ""your-secret-here""
+    }
+  }
+}</code></pre>
+
+<h3>Step 3: Register Services</h3>
+<p>Update your <code>Startup.cs</code> or <code>Program.cs</code>:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public void ConfigureServices(IServiceCollection services)
+{
+    services.AddCms()
+            .AddContentGraph()    // Required for CMS 13
+            .AddContentManager(); // For the new Content Manager
+}</code></pre>
+
+<h3>Step 4: Initial Index</h3>
+<p>After configuration, trigger initial indexing:</p>
+<ol>
+    <li>Navigate to <strong>Admin &gt; Config &gt; Optimizely Graph</strong></li>
+    <li>Click <strong>Rebuild Index</strong></li>
+    <li>Wait for indexing to complete</li>
+    <li>Verify content appears in queries</li>
+</ol>
+
+<h3>Verification Steps</h3>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Test Graph connectivity
+public class GraphHealthCheck
+{
+    private readonly IGraphClient _graphClient;
+
+    public async Task&lt;bool&gt; CheckConnectivity()
+    {
+        try
+        {
+            var result = await _graphClient.Query&lt;object&gt;(@""
+                query { __typename }
+            "");
+            return result != null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}</code></pre>
+
+<h3>Troubleshooting</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Issue</th>
+            <th class=""px-4 py-2 text-left"">Resolution</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">401 Unauthorized</td><td class=""px-4 py-2"">Verify API keys are correct</td></tr>
+        <tr><td class=""px-4 py-2"">No content indexed</td><td class=""px-4 py-2"">Trigger manual rebuild from admin</td></tr>
+        <tr><td class=""px-4 py-2"">Connection timeout</td><td class=""px-4 py-2"">Check network/firewall settings</td></tr>
+        <tr><td class=""px-4 py-2"">Content Manager blank</td><td class=""px-4 py-2"">Ensure AddContentManager() is called</td></tr>
+    </tbody>
+</table>
+
+<div class=""bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4 my-4"">
+    <p class=""text-red-800 dark:text-red-100""><strong>Critical:</strong> CMS 13 will not function correctly without Graph integration. This is not optional.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "mig-deprecated",
+                    ModuleId = "migration-12-to-13",
+                    Title = "Removing Deprecated Features",
+                    Summary = "Identify and remove deprecated features that are incompatible with CMS 13.",
+                    Order = 5,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Disable Projects feature",
+                        "Remove Plugin Manager dependencies",
+                        "Replace On-Page Edit with Visual Builder"
+                    },
+                    Content = @"
+<h2>Removing Deprecated Features</h2>
+<p>Several CMS 12 features must be disabled or removed for CMS 13 to function.</p>
+
+<h3>1. Projects Feature</h3>
+<p>The Projects feature is <strong>not supported</strong> in CMS 13 and must be disabled:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Disable Projects in configuration
+services.Configure&lt;ProjectOptions&gt;(options =>
+{
+    options.Enabled = false;
+});</code></pre>
+
+<h4>Alternative Workflow Options</h4>
+<ul>
+    <li>Use scheduled publishing for coordinated releases</li>
+    <li>Implement custom approval workflows</li>
+    <li>Use content variations for staged content</li>
+    <li>Consider third-party workflow solutions</li>
+</ul>
+
+<h3>2. Plugin Manager</h3>
+<p>The Plugin Manager UI and backend have been removed:</p>
+<ul>
+    <li>Remove any <code>PlugInAttribute</code> decorations</li>
+    <li>Update scheduled jobs to modern patterns</li>
+    <li>Remove custom property type plugin registrations</li>
+</ul>
+
+<h4>Scheduled Job Migration</h4>
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
+[ScheduledPlugIn(DisplayName = ""My Job"")]
+public class MyJob : ScheduledJobBase
+{
+    public override string Execute() { ... }
+}
+
+// CMS 13
+[ScheduledJob(
+    Guid = ""generate-unique-guid"",
+    Name = ""My Job"")]
+public class MyJob : ScheduledJob
+{
+    public override DataStatus Execute(CancellationToken ct)
+    {
+        // Implementation
+        return DataStatus.Succeeded;
+    }
+}</code></pre>
+
+<h3>3. On-Page Edit (OPE)</h3>
+<p>On-Page Edit is disabled in CMS 13. Visual Builder is the primary editing interface:</p>
+
+<ul>
+    <li><strong>Remove OPE-specific code</strong> - Any custom OPE integrations</li>
+    <li><strong>Update editor training</strong> - Familiarize editors with Visual Builder</li>
+    <li><strong>Configure content types</strong> - Ensure types work with Visual Builder</li>
+</ul>
+
+<h3>4. ServiceLocator Pattern</h3>
+<p>While not completely removed, ServiceLocator is deprecated:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Find all usages
+// Search for: ServiceLocator.Current
+
+// Replace with constructor injection or IServiceProvider</code></pre>
+
+<h3>5. PageReference</h3>
+<p>Replace all <code>PageReference</code> with <code>ContentReference</code>:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Search and replace:
+// PageReference → ContentReference
+// PageReference.EmptyReference → ContentReference.EmptyReference
+// PageReference.StartPage → ContentReference.StartPage</code></pre>
+
+<h3>Code Audit Checklist</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Search For</th>
+            <th class=""px-4 py-2 text-left"">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2""><code>ScheduledPlugIn</code></td><td class=""px-4 py-2"">Replace with <code>ScheduledJob</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>ServiceLocator.Current</code></td><td class=""px-4 py-2"">Refactor to DI</td></tr>
+        <tr><td class=""px-4 py-2""><code>PageReference</code></td><td class=""px-4 py-2"">Replace with <code>ContentReference</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>SiteDefinition</code></td><td class=""px-4 py-2"">Replace with <code>Application</code></td></tr>
+        <tr><td class=""px-4 py-2""><code>Projects</code> references</td><td class=""px-4 py-2"">Remove or replace with alternatives</td></tr>
+    </tbody>
+</table>
+
+<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
+    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Warning:</strong> CMS 13 will fail to start if Projects is enabled. Ensure it is disabled before deployment.</p>
+</div>
+"
+                },
+                new Lesson
+                {
+                    Id = "mig-testing",
+                    ModuleId = "migration-12-to-13",
+                    Title = "Testing and Validation",
+                    Summary = "Comprehensive testing strategies for your migrated CMS 13 application.",
+                    Order = 6,
+                    EstimatedMinutes = 10,
+                    LearningObjectives = new List<string>
+                    {
+                        "Create a migration testing plan",
+                        "Validate functionality after migration",
+                        "Troubleshoot common post-migration issues"
+                    },
+                    Content = @"
+<h2>Testing and Validation</h2>
+<p>Thorough testing is essential after migrating to CMS 13 to ensure everything works correctly.</p>
+
+<h3>Testing Phases</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Phase</th>
+            <th class=""px-4 py-2 text-left"">Focus Area</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">1. Build Verification</td><td class=""px-4 py-2"">Compilation, dependency resolution</td></tr>
+        <tr><td class=""px-4 py-2"">2. Startup Testing</td><td class=""px-4 py-2"">Application launches without errors</td></tr>
+        <tr><td class=""px-4 py-2"">3. Functional Testing</td><td class=""px-4 py-2"">Core features work correctly</td></tr>
+        <tr><td class=""px-4 py-2"">4. Integration Testing</td><td class=""px-4 py-2"">Third-party integrations function</td></tr>
+        <tr><td class=""px-4 py-2"">5. Performance Testing</td><td class=""px-4 py-2"">Response times acceptable</td></tr>
+        <tr><td class=""px-4 py-2"">6. User Acceptance</td><td class=""px-4 py-2"">Editors can perform their tasks</td></tr>
+    </tbody>
+</table>
+
+<h3>Critical Functionality Checklist</h3>
+
+<h4>Content Management</h4>
+<ul>
+    <li>☐ Content Manager loads and displays content</li>
+    <li>☐ Search returns expected results</li>
+    <li>☐ Content creation works for all types</li>
+    <li>☐ Publishing workflow functions correctly</li>
+    <li>☐ Media management works</li>
+</ul>
+
+<h4>Visual Builder</h4>
+<ul>
+    <li>☐ Experiences render correctly</li>
+    <li>☐ Section editing works</li>
+    <li>☐ Preview displays content</li>
+    <li>☐ Templates and blueprints function</li>
+</ul>
+
+<h4>Graph Integration</h4>
+<ul>
+    <li>☐ Content indexes to Graph</li>
+    <li>☐ Search queries return results</li>
+    <li>☐ Real-time updates sync</li>
+    <li>☐ Authentication works</li>
+</ul>
+
+<h4>Multi-Site (if applicable)</h4>
+<ul>
+    <li>☐ All sites resolve correctly</li>
+    <li>☐ Host bindings work</li>
+    <li>☐ Site-specific content is isolated</li>
+</ul>
+
+<h3>Common Post-Migration Issues</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Symptom</th>
+            <th class=""px-4 py-2 text-left"">Likely Cause</th>
+            <th class=""px-4 py-2 text-left"">Solution</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">CMS won't start</td><td class=""px-4 py-2"">Projects enabled</td><td class=""px-4 py-2"">Disable Projects feature</td></tr>
+        <tr><td class=""px-4 py-2"">Content Manager empty</td><td class=""px-4 py-2"">Graph not configured</td><td class=""px-4 py-2"">Configure Graph, rebuild index</td></tr>
+        <tr><td class=""px-4 py-2"">Compilation errors</td><td class=""px-4 py-2"">Deprecated API usage</td><td class=""px-4 py-2"">Update to new APIs</td></tr>
+        <tr><td class=""px-4 py-2"">Runtime exceptions</td><td class=""px-4 py-2"">ServiceLocator usage</td><td class=""px-4 py-2"">Refactor to DI</td></tr>
+        <tr><td class=""px-4 py-2"">Missing content</td><td class=""px-4 py-2"">Indexing incomplete</td><td class=""px-4 py-2"">Trigger full reindex</td></tr>
+    </tbody>
+</table>
+
+<h3>Performance Baseline</h3>
+<p>Establish performance baselines for comparison:</p>
+
+<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Key metrics to measure
+- Page load time (frontend)
+- API response times
+- Graph query latency
+- CMS admin interface responsiveness
+- Content publishing time</code></pre>
+
+<h3>Go-Live Checklist</h3>
+<ol>
+    <li>☐ All tests passing</li>
+    <li>☐ Editor training completed</li>
+    <li>☐ Backup verified and restorable</li>
+    <li>☐ Rollback procedure documented</li>
+    <li>☐ Monitoring configured</li>
+    <li>☐ Support team briefed</li>
+</ol>
+
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Success Tip:</strong> Plan for a ""hypercare"" period immediately after go-live with increased support availability to quickly address any issues that arise.</p>
 </div>
 "
                 }
