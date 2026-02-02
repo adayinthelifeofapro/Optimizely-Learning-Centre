@@ -197,6 +197,12 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 [MIT License](LICENSE)
 
+## Support
+
+If you've found this learning centre helpful, consider buying me a coffee. It helps keep me caffeinated and creating more content!
+
+<a href="https://buymeacoffee.com/adayinthelife" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a>
+
 ## Resources
 
 - [Optimizely Developer Portal](https://docs.developers.optimizely.com/)
