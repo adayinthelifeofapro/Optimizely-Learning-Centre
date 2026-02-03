@@ -18,6 +18,7 @@ using OptimizelyLearningCentre.Client.Courses.ContentRecs;
 using OptimizelyLearningCentre.Client.Courses.ODP;
 using OptimizelyLearningCentre.Client.Courses.ConfiguredCommerce;
 using OptimizelyLearningCentre.Client.Courses.Analytics;
+using OptimizelyLearningCentre.Client.Courses.ProductRecs;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -54,6 +55,7 @@ builder.Services.AddSingleton<ICourseRegistry>(sp =>
     registry.RegisterCourse(ODPCourse.Definition);
     registry.RegisterCourse(ConfiguredCommerceCourse.Definition);
     registry.RegisterCourse(AnalyticsCourse.Definition);
+    registry.RegisterCourse(ProductRecsCourse.Definition);
     return registry;
 });
 builder.Services.AddScoped<ICourseContext, CourseContext>();
@@ -73,6 +75,7 @@ builder.Services.AddScoped<ContentRecsContentProvider>();
 builder.Services.AddScoped<ODPContentProvider>();
 builder.Services.AddScoped<ConfiguredCommerceContentProvider>();
 builder.Services.AddScoped<AnalyticsContentProvider>();
+builder.Services.AddScoped<ProductRecsContentProvider>();
 
 // Core Services
 builder.Services.AddScoped<ISettingsService, LocalStorageSettingsService>();
