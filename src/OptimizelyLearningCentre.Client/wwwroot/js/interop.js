@@ -1,3 +1,13 @@
+// Blazor error UI dismiss button
+document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.getElementById('blazor-error-dismiss');
+    if (btn) {
+        btn.addEventListener('click', function () {
+            btn.parentElement.style.display = 'none';
+        });
+    }
+});
+
 window.clipboardInterop = {
     copyText: async function (text) {
         try {
