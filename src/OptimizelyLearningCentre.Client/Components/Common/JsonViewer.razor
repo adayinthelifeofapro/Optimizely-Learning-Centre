@@ -18,25 +18,36 @@
     [Parameter]
     public int MaxHeight { get; set; } = 400;
 
-    private string FormattedJson
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(Json))
-                return string.Empty;
+    private string? _lastJson;
+    private string _formatted = string.Empty;
 
-            try
+    protected override void OnParametersSet()
+    {
+        if (Json != _lastJson)
+        {
+            _lastJson = Json;
+            _formatted = FormatJson(Json);
+        }
+    }
+
+    private string FormattedJson => _formatted;
+
+    private static string FormatJson(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            return string.Empty;
+
+        try
+        {
+            var doc = JsonDocument.Parse(json);
+            return JsonSerializer.Serialize(doc, new JsonSerializerOptions
             {
-                var doc = JsonDocument.Parse(Json);
-                return JsonSerializer.Serialize(doc, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
-            }
-            catch
-            {
-                return Json;
-            }
+                WriteIndented = true
+            });
+        }
+        catch
+        {
+            return json;
         }
     }
 }

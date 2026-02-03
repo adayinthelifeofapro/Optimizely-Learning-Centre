@@ -13,6 +13,8 @@ public class LearningService : ILearningService
     private readonly ICourseContext _courseContext;
     private readonly IServiceProvider _serviceProvider;
     private readonly ISettingsService _settingsService;
+    private UserProgress? _progressCache;
+    private string? _progressCacheCourseId;
 
     public LearningService(
         ILocalStorageService localStorage,
@@ -46,21 +48,35 @@ public class LearningService : ILearningService
 
     public async Task<UserProgress> GetUserProgressAsync()
     {
+        var currentCourseId = _courseContext.CurrentCourse?.Id;
+        if (_progressCache != null && _progressCacheCourseId == currentCourseId)
+            return _progressCache;
+
         var key = _courseContext.GetStorageKey("progress");
         try
         {
-            return await _localStorage.GetItemAsync<UserProgress>(key) ?? new UserProgress();
+            _progressCache = await _localStorage.GetItemAsync<UserProgress>(key) ?? new UserProgress();
         }
         catch
         {
-            return new UserProgress();
+            _progressCache = new UserProgress();
         }
+        _progressCacheCourseId = currentCourseId;
+        return _progressCache;
     }
 
     public async Task SaveUserProgressAsync(UserProgress progress)
     {
         var key = _courseContext.GetStorageKey("progress");
         await _localStorage.SetItemAsync(key, progress);
+        _progressCache = progress;
+        _progressCacheCourseId = _courseContext.CurrentCourse?.Id;
+    }
+
+    public void InvalidateProgressCache()
+    {
+        _progressCache = null;
+        _progressCacheCourseId = null;
     }
 
     public async Task MarkLessonCompleteAsync(string lessonId)

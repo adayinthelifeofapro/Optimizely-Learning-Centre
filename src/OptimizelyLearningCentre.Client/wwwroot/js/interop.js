@@ -44,9 +44,19 @@ window.scrollInterop = {
     },
 
     dispose: function (elementId) {
-        if (this.observers[elementId]) {
-            this.observers[elementId].disconnect();
+        const observer = this.observers[elementId];
+        if (observer) {
+            observer.disconnect();
             delete this.observers[elementId];
         }
+    },
+
+    disposeAll: function () {
+        for (const elementId in this.observers) {
+            if (Object.prototype.hasOwnProperty.call(this.observers, elementId)) {
+                this.observers[elementId].disconnect();
+            }
+        }
+        this.observers = {};
     }
 };

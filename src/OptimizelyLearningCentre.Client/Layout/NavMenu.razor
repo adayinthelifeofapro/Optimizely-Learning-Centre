@@ -116,6 +116,7 @@
     private const string ActiveClass = "nav-link-active bg-opti-blue dark:bg-blue-600 text-white hover:bg-opti-blue dark:hover:bg-blue-600 hover:text-white";
 
     private List<LearningModule> _modules = new();
+    private bool _disposed;
 
     protected override void OnInitialized()
     {
@@ -124,6 +125,7 @@
 
     private async void HandleCourseChanged(CourseDefinition? course)
     {
+        if (_disposed) return;
         if (course != null)
         {
             _modules = await LearningService.GetModulesAsync();
@@ -145,6 +147,7 @@
 
     public void Dispose()
     {
+        _disposed = true;
         CourseContext.OnCourseChanged -= HandleCourseChanged;
     }
 

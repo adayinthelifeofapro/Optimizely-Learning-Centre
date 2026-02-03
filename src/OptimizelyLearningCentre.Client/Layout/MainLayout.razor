@@ -117,6 +117,7 @@
 
 @code {
     private bool _isDarkMode;
+    private bool _disposed;
     private CourseDefinition? _currentCourse;
 
     private string RootClass => _isDarkMode
@@ -156,17 +157,20 @@
 
     private void OnStateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        if (_disposed) return;
         InvokeAsync(StateHasChanged);
     }
 
     private async void OnSettingsChanged(GraphSettings settings)
     {
+        if (_disposed) return;
         _isDarkMode = settings.IsDarkMode;
         await InvokeAsync(StateHasChanged);
     }
 
     private void OnCourseChanged(CourseDefinition? course)
     {
+        if (_disposed) return;
         _currentCourse = course;
         InvokeAsync(StateHasChanged);
     }
@@ -186,6 +190,7 @@
 
     public void Dispose()
     {
+        _disposed = true;
         AppState.PropertyChanged -= OnStateChanged;
         SettingsService.OnSettingsChanged -= OnSettingsChanged;
         CourseContext.OnCourseChanged -= OnCourseChanged;

@@ -140,6 +140,9 @@ else if (_course != null)
                     </Card>
 
                     <!-- Lesson Content -->
+                    <!-- SECURITY: Content is rendered as raw HTML via MarkupString. This is safe while
+                         content is sourced from hardcoded ILearningContentProvider implementations.
+                         If content ever becomes dynamic (CMS, user input), add HTML sanitisation. -->
                     <Card>
                         <ChildContent>
                         <div class="prose dark:prose-invert max-w-none">

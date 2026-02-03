@@ -11,6 +11,26 @@
         <p class="text-gray-600 dark:text-gray-400 mt-1">Configure your Optimizely Graph connection</p>
     </div>
 
+    <!-- Security Notice -->
+    <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <div>
+                <p class="text-sm font-medium text-amber-800 dark:text-amber-300">Credentials stored in browser</p>
+                <p class="text-sm text-amber-700 dark:text-amber-400 mt-1">Your API keys are saved in browser localStorage and persist until cleared. Use <strong>read-only or test keys</strong> rather than production secrets. Anyone with access to this browser can view these credentials.</p>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_validationError))
+    {
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-sm text-red-700 dark:text-red-400" role="alert">
+            @_validationError
+        </div>
+    }
+
     <Card Title="Connection Settings">
         <ChildContent>
         <div class="space-y-6">
@@ -213,6 +233,7 @@
     private bool _isTesting;
     private bool _isSaving;
     private (bool Success, string Message)? _testResult;
+    private string? _validationError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -248,11 +269,38 @@
         }
     }
 
+    private bool ValidateSettings()
+    {
+        _validationError = null;
+
+        if (!string.IsNullOrWhiteSpace(_settings.Endpoint))
+        {
+            if (!Uri.TryCreate(_settings.Endpoint, UriKind.Absolute, out var uri)
+                || (uri.Scheme != "https" && uri.Scheme != "http"))
+            {
+                _validationError = "Endpoint must be a valid HTTP or HTTPS URL.";
+                return false;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(_settings.DefaultLocale)
+            && !System.Text.RegularExpressions.Regex.IsMatch(_settings.DefaultLocale, @"^[a-zA-Z]{2,5}(-[a-zA-Z]{2,5})?$"))
+        {
+            _validationError = "Locale must be a valid format (e.g., en, sv, en-US).";
+            return false;
+        }
+
+        return true;
+    }
+
     private async Task SaveSettings()
     {
         _isSaving = true;
         try
         {
+            if (!ValidateSettings())
+                return;
+
             await SettingsService.SaveSettingsAsync(_settings);
             AppState.ShowSuccess("Settings saved successfully!");
         }

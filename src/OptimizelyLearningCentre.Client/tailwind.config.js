@@ -6,7 +6,6 @@ module.exports = {
     './Components/**/*.razor',
     './Pages/**/*.razor',
     './Courses/**/*.razor',
-    './Courses/**/*.cs',
     './*.razor',
     './wwwroot/index.html'
   ],
