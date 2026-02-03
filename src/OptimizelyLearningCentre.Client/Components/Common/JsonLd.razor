@@ -1,0 +1,10 @@
+@using Microsoft.AspNetCore.Components.Web
+
+<HeadContent>
+    <script type="application/ld+json">@((MarkupString)Json)</script>
+</HeadContent>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Json { get; set; } = string.Empty;
+}

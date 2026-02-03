@@ -5,6 +5,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Optimizely Learning Centre</title>
+    <meta name="description" content="Free interactive learning platform for Optimizely products. Master Graph, SaaS CMS, Opal AI, Analytics, Commerce and more through structured courses with hands-on examples." />
+    <meta name="keywords" content="Optimizely, Graph, GraphQL, SaaS CMS, Opal AI, DXP, learning, courses, tutorial, training, content management" />
+    <meta name="author" content="Graham Carr" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://optilearningcentre.adayinthelife.pro/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Optimizely Learning Centre" />
+    <meta property="og:title" content="Optimizely Learning Centre" />
+    <meta property="og:description" content="Free interactive learning platform for Optimizely products. Master Graph, SaaS CMS, Opal AI, Analytics, Commerce and more through structured courses." />
+    <meta property="og:url" content="https://optilearningcentre.adayinthelife.pro/" />
+    <meta property="og:image" content="https://optilearningcentre.adayinthelife.pro/icon-192.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Optimizely Learning Centre" />
+    <meta name="twitter:description" content="Free interactive learning platform for Optimizely products. Master Graph, SaaS CMS, Opal AI, Analytics, Commerce and more." />
+    <meta name="twitter:image" content="https://optilearningcentre.adayinthelife.pro/icon-192.png" />
+    <meta name="twitter:creator" content="@GrahamCarr74" />
+
     <base href="/" />
     <link rel="preload" id="webassembly" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +35,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="apple-touch-icon" href="favicon.png" />
+    <link rel="manifest" href="/manifest.json" />
     <link href="OptimizelyLearningCentre.Client.styles.css" rel="stylesheet" />
     <script type="importmap"></script>
 </head>
@@ -28,10 +50,19 @@
         </div>
     </div>
 
+    <noscript>
+        <div style="padding: 2rem; max-width: 800px; margin: 0 auto; font-family: sans-serif;">
+            <h1>Optimizely Learning Centre</h1>
+            <p>The Optimizely Learning Centre is a free interactive platform for learning Optimizely products including Graph, SaaS CMS, Opal AI, Analytics, Commerce, DXP, CMP, Web Experimentation, Feature Experimentation, Content Recommendations, ODP, Configured Commerce, Product Recommendations, and PIM.</p>
+            <p>This application requires JavaScript to run. Please enable JavaScript in your browser to access the full interactive learning experience.</p>
+            <p>Created by Graham Carr, Solutions Architect and Platinum OMVP.</p>
+        </div>
+    </noscript>
+
     <div id="blazor-error-ui" class="fixed bottom-0 left-0 right-0 p-4 bg-red-600 text-white text-center hidden">
         An unhandled error has occurred.
         <a href="." class="underline ml-2">Reload</a>
-        <button class="ml-4 text-xl" onclick="this.parentElement.style.display='none'">×</button>
+        <button class="ml-4 text-xl" onclick="this.parentElement.style.display='none'">&times;</button>
     </div>
     <script src="js/interop.js"></script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>

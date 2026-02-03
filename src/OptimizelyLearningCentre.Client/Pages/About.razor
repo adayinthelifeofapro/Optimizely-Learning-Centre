@@ -1,6 +1,13 @@
 @page "/about"
+@inject NavigationManager Navigation
 
 <PageTitle>About - Optimizely Learning Centre</PageTitle>
+<HeadContent>
+    <meta name="description" content="Graham Carr - Solutions Architect and Platinum OMVP with 28 years in tech. Creator of the Optimizely Learning Centre. Specialising in CMS platforms, headless architecture, and cloud infrastructure." />
+    <link rel="canonical" href="@(Navigation.BaseUri)about" />
+</HeadContent>
+
+<JsonLd Json="@_personJsonLd" />
 
 <div class="max-w-4xl mx-auto space-y-8">
     <!-- Hero Section -->
@@ -190,3 +197,30 @@
         </div>
     </div>
 </div>
+
+@code {
+    private string _personJsonLd => $$"""
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Graham Carr",
+        "jobTitle": "Solutions Architect",
+        "description": "Platinum OMVP with 28 years in tech, specialising in CMS platforms, cloud infrastructure, and headless architecture.",
+        "url": "https://adayinthelife.pro",
+        "sameAs": [
+            "https://www.linkedin.com/in/carrgraham/",
+            "https://x.com/GrahamCarr74",
+            "https://github.com/adayinthelifeofapro"
+        ],
+        "knowsAbout": ["Optimizely CMS", "GraphQL", "AWS", "Azure", "Headless Architecture", ".NET"],
+        "alumniOf": {
+            "@type": "EducationalOrganization",
+            "name": "BSc Hons Information Systems"
+        },
+        "worksFor": {
+            "@type": "Organization",
+            "name": "Netcel"
+        }
+    }
+    """;
+}

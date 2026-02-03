@@ -9,6 +9,12 @@
 @if (_course != null)
 {
     <PageTitle>@_course.Name Learning Centre</PageTitle>
+    <HeadContent>
+        <meta name="description" content="@($"Learn {_course.Name} through interactive lessons and hands-on examples. {_course.Description}")" />
+        <link rel="canonical" href="@($"{Navigation.BaseUri}courses/{CourseId}")" />
+    </HeadContent>
+
+    <JsonLd Json="@_courseJsonLd" />
 
     <div class="max-w-6xl mx-auto space-y-8">
         <!-- Hero Section -->
@@ -138,6 +144,7 @@ else
     private CourseDefinition? _course;
     private List<LearningModule> _modules = new();
     private bool _isDarkMode;
+    private string _courseJsonLd = "{}";
 
     protected override async Task OnParametersSetAsync()
     {
@@ -155,6 +162,7 @@ else
         _isDarkMode = settings.IsDarkMode;
 
         _modules = await LearningService.GetModulesAsync();
+        _courseJsonLd = BuildCourseJsonLd();
 
         // Check connection status for Graph course
         if (_course.Id == "graph")
@@ -191,6 +199,39 @@ else
         "playground" => "Write and execute raw GraphQL queries directly. Perfect for testing complex queries, exploring the schema, and experimenting with advanced features.",
         _ => "Explore this tool to enhance your learning experience."
     };
+
+    private string BuildCourseJsonLd()
+    {
+        if (_course == null) return "{}";
+
+        var moduleParts = string.Join(",\n", _modules.Select(m =>
+            $$"""{"@type":"LearningResource","name":"{{EscapeJson(m.Title)}}","description":"{{EscapeJson(m.Description)}}","educationalLevel":"{{m.Difficulty}}","numberOfLessons":{{m.Lessons.Count}}}"""));
+
+        return $$"""
+        {
+            "@context": "https://schema.org",
+            "@type": "Course",
+            "name": "{{EscapeJson(_course.Name)}}",
+            "description": "{{EscapeJson(_course.LongDescription)}}",
+            "url": "{{Navigation.BaseUri}}courses/{{_course.Id}}",
+            "provider": {
+                "@type": "Person",
+                "name": "Graham Carr",
+                "url": "https://adayinthelife.pro"
+            },
+            "isAccessibleForFree": true,
+            "hasCourseInstance": {
+                "@type": "CourseInstance",
+                "courseMode": "online",
+                "courseWorkload": "Self-paced"
+            },
+            "numberOfModules": {{_modules.Count}},
+            "hasPart": [{{moduleParts}}]
+        }
+        """;
+    }
+
+    private static string EscapeJson(string value) => value.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
     private string GetHeroStyle()
     {

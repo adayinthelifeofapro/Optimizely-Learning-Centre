@@ -14,7 +14,10 @@
       "WebFetch(domain:www.optimizely.com)",
       "Bash(findstr:*)",
       "Read(//d/**)",
-      "WebFetch(domain:webhelp.optimizely.com)"
+      "WebFetch(domain:webhelp.optimizely.com)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(xargs:*)"
     ]
   }
 }

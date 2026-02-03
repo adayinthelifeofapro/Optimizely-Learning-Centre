@@ -7,6 +7,10 @@
 @if (_course != null)
 {
     <PageTitle>Learn - @_course.Name Learning Centre</PageTitle>
+    <HeadContent>
+        <meta name="description" content="@($"Browse all {_course.Name} learning modules. {_modules.Count} modules with structured lessons from beginner to advanced, including hands-on examples.")" />
+        <link rel="canonical" href="@($"{Navigation.BaseUri}courses/{CourseId}/learn")" />
+    </HeadContent>
 
     <div class="max-w-6xl mx-auto space-y-6">
         <div>

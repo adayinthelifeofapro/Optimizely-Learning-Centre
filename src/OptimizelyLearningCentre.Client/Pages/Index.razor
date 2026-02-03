@@ -1,8 +1,15 @@
 @page "/"
 @inject ICourseRegistry CourseRegistry
 @inject ICourseContext CourseContext
+@inject NavigationManager Navigation
 
 <PageTitle>Optimizely Learning Centre</PageTitle>
+<HeadContent>
+    <meta name="description" content="Free interactive learning platform for Optimizely products. Choose from @_courses.Count courses covering Graph, SaaS CMS, Opal AI, Analytics, Commerce and more." />
+    <link rel="canonical" href="@Navigation.BaseUri" />
+</HeadContent>
+
+<JsonLd Json="@_jsonLd" />
 
 <div class="max-w-6xl mx-auto space-y-8">
     <!-- Hero Section -->
@@ -133,11 +140,46 @@
 
 @code {
     private IReadOnlyList<CourseDefinition> _courses = Array.Empty<CourseDefinition>();
+    private string _jsonLd = "{}";
 
     protected override void OnInitialized()
     {
         // Clear the current course context when viewing the catalog
         CourseContext.SetCurrentCourse(null);
         _courses = CourseRegistry.GetAllCourses();
+        _jsonLd = BuildJsonLd();
     }
+
+    private string BuildJsonLd()
+    {
+        var courseListItems = string.Join(",\n", _courses.Select((c, i) =>
+            $$"""{"@type":"ListItem","position":{{i + 1}},"url":"{{Navigation.BaseUri}}courses/{{c.Id}}","name":"{{EscapeJson(c.Name)}}"}"""));
+
+        return $$"""
+        [
+            {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "Optimizely Learning Centre",
+                "url": "{{Navigation.BaseUri}}",
+                "description": "Free interactive learning platform for Optimizely products",
+                "publisher": {
+                    "@type": "Person",
+                    "name": "Graham Carr",
+                    "jobTitle": "Solutions Architect",
+                    "url": "https://adayinthelife.pro"
+                }
+            },
+            {
+                "@context": "https://schema.org",
+                "@type": "ItemList",
+                "name": "Optimizely Courses",
+                "numberOfItems": {{_courses.Count}},
+                "itemListElement": [{{courseListItems}}]
+            }
+        ]
+        """;
+    }
+
+    private static string EscapeJson(string value) => value.Replace("\"", "\\\"");
 }

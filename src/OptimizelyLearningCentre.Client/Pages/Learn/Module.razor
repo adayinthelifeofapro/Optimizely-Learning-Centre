@@ -10,6 +10,23 @@
 @if (_course != null)
 {
     <PageTitle>@(_module?.Title ?? "Loading...") - @_course.Name Learning Centre</PageTitle>
+    <HeadContent>
+        @if (_currentLesson != null)
+        {
+            <meta name="description" content="@($"{_currentLesson.Summary} - Part of the {_module?.Title} module in the {_course.Name} Learning Centre.")" />
+            <link rel="canonical" href="@($"{Navigation.BaseUri}courses/{CourseId}/learn/{ModuleId}/{LessonId}")" />
+        }
+        else if (_module != null)
+        {
+            <meta name="description" content="@($"{_module.Description} - {_module.Lessons.Count} lessons covering {_module.Difficulty} level content in the {_course.Name} Learning Centre.")" />
+            <link rel="canonical" href="@($"{Navigation.BaseUri}courses/{CourseId}/learn/{ModuleId}")" />
+        }
+    </HeadContent>
+
+    @if (_module != null)
+    {
+        <JsonLd Json="@_moduleJsonLd" />
+    }
 }
 
 @if (_isLoading)
@@ -30,20 +47,20 @@ else if (_course != null)
 {
     <div class="max-w-6xl mx-auto">
         <!-- Breadcrumb -->
-        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
             <a href="@($"/courses/{CourseId}/learn")" class="hover:text-opti-blue dark:hover:text-blue-400">Learning Centre</a>
-            <span>/</span>
+            <span aria-hidden="true">/</span>
             <span class="text-gray-900 dark:text-gray-100">@_module.Title</span>
             @if (_currentLesson != null)
             {
-                <span>/</span>
-                <span class="text-gray-900 dark:text-gray-100">@_currentLesson.Title</span>
+                <span aria-hidden="true">/</span>
+                <span class="text-gray-900 dark:text-gray-100" aria-current="page">@_currentLesson.Title</span>
             }
-        </div>
+        </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Sidebar - Lessons List -->
-            <aside class="lg:col-span-1">
+            <aside class="lg:col-span-1" aria-label="Lesson navigation">
                 <Card Title="Lessons">
                     <ChildContent>
                     <nav class="space-y-1 -mx-2">
@@ -284,6 +301,7 @@ else if (_course != null)
     private Dictionary<string, bool> _unlockedLessons = new();
     private DotNetObjectReference<Module>? _dotNetRef;
     private bool _scrollObserverInitialized;
+    private string _moduleJsonLd = "{}";
 
     protected override void OnInitialized()
     {
@@ -407,8 +425,60 @@ else if (_course != null)
             }
         }
 
+        _moduleJsonLd = BuildModuleJsonLd();
         _isLoading = false;
     }
+
+    private string BuildModuleJsonLd()
+    {
+        if (_course == null || _module == null) return "{}";
+
+        var baseUrl = Navigation.BaseUri;
+
+        if (_currentLesson != null)
+        {
+            return $$"""
+            {
+                "@context": "https://schema.org",
+                "@type": "LearningResource",
+                "name": "{{EscapeJson(_currentLesson.Title)}}",
+                "description": "{{EscapeJson(_currentLesson.Summary)}}",
+                "url": "{{baseUrl}}courses/{{CourseId}}/learn/{{ModuleId}}/{{LessonId}}",
+                "isPartOf": {
+                    "@type": "Course",
+                    "name": "{{EscapeJson(_course.Name)}}",
+                    "url": "{{baseUrl}}courses/{{_course.Id}}"
+                },
+                "educationalLevel": "{{_module.Difficulty}}",
+                "learningResourceType": "lesson",
+                "isAccessibleForFree": true
+            }
+            """;
+        }
+
+        var lessonParts = string.Join(",\n", _module.Lessons.OrderBy(l => l.Order).Select(l =>
+            $$"""{"@type":"LearningResource","name":"{{EscapeJson(l.Title)}}","description":"{{EscapeJson(l.Summary)}}","url":"{{baseUrl}}courses/{{CourseId}}/learn/{{ModuleId}}/{{l.Id}}"}"""));
+
+        return $$"""
+        {
+            "@context": "https://schema.org",
+            "@type": "Course",
+            "name": "{{EscapeJson(_module.Title)}}",
+            "description": "{{EscapeJson(_module.Description)}}",
+            "url": "{{baseUrl}}courses/{{CourseId}}/learn/{{ModuleId}}",
+            "provider": {
+                "@type": "Person",
+                "name": "Graham Carr",
+                "url": "https://adayinthelife.pro"
+            },
+            "educationalLevel": "{{_module.Difficulty}}",
+            "isAccessibleForFree": true,
+            "hasPart": [{{lessonParts}}]
+        }
+        """;
+    }
+
+    private static string EscapeJson(string value) => value.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", " ").Replace("\r", "");
 
     private async Task RefreshUnlockedLessons()
     {
