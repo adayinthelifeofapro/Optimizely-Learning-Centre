@@ -192,7 +192,7 @@ public class CMS13ContentProvider : ILearningContentProvider
 
 <h3>Getting Started</h3>
 <p>To integrate Graph into your CMS 13 application, add this to your startup file:</p>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>services.AddContentGraph()</code></pre>
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>services.AddContentGraph()</code></pre>
 
 <div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
     <p class=""text-blue-800 dark:text-blue-100""><strong>Note:</strong> The Graph C# SDK provides a fluent .NET API for querying Optimizely Graph with typed deserialization, filtering, ordering, and pagination support.</p>
@@ -510,7 +510,7 @@ public class CMS13ContentProvider : ILearningContentProvider
 <h3>Tag Helpers</h3>
 <p>CMS 13 provides tag helpers for rendering Visual Builder compositions:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>&lt;epi-outline&gt;
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>&lt;epi-outline&gt;
     &lt;epi-component /&gt;
     &lt;epi-grid&gt;
         &lt;epi-row&gt;
@@ -598,7 +598,7 @@ public class CMS13ContentProvider : ILearningContentProvider
 <h4>3. Configure appSettings.json</h4>
 <p>Add the gateway address and credentials to your application configuration:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>{
   ""Optimizely"": {
     ""Graph"": {
       ""GatewayAddress"": ""https://graph.optimizely.com"",
@@ -612,7 +612,7 @@ public class CMS13ContentProvider : ILearningContentProvider
 <h4>4. Register Services</h4>
 <p>In your <code>Startup.cs</code> or <code>Program.cs</code>, register the required services:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>services.AddContentGraph()
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>services.AddContentGraph()
         .AddContentManager();</code></pre>
 
 <div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
@@ -1087,7 +1087,7 @@ public class CMS13ContentProvider : ILearningContentProvider
 
 <h4>Single-Key Authentication</h4>
 <p>Simple API key authentication suitable for public content:</p>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>{
   ""Optimizely"": {
     ""Graph"": {
       ""SingleKey"": ""your-public-single-key""
@@ -1097,7 +1097,7 @@ public class CMS13ContentProvider : ILearningContentProvider
 
 <h4>HMAC Authentication</h4>
 <p>More secure option using AppKey and Secret for sensitive operations:</p>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>{
   ""Optimizely"": {
     ""Graph"": {
       ""AppKey"": ""your-app-key"",
@@ -1287,7 +1287,7 @@ public class CMS13ContentProvider : ILearningContentProvider
 
 <h3>Example Configuration</h3>
 <p>Consider this fallback chain:</p>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>French (Belgium) → Dutch (Belgium) → Dutch
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>French (Belgium) → Dutch (Belgium) → Dutch
 fr-BE            → nl-BE           → nl</code></pre>
 
 <p>If content doesn't exist in <code>fr-BE</code>, the system looks for <code>nl-BE</code>. If that also doesn't exist, it falls back to <code>nl</code>.</p>
@@ -1494,7 +1494,7 @@ fr-BE            → nl-BE           → nl</code></pre>
 
 <h3>Unique Identifiers</h3>
 <p>Each variation receives a unique identifier following this format:</p>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>Guid_Status_Language_VariantKey</code></pre>
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>Guid_Status_Language_VariantKey</code></pre>
 "
                 },
                 new Lesson
@@ -1585,7 +1585,7 @@ fr-BE            → nl-BE           → nl</code></pre>
 <h3>IContentVariantRepository</h3>
 <p>The central interface for variation management:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public interface IContentVariantRepository
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public interface IContentVariantRepository
 {
     // List all variations for a content item
     IEnumerable&lt;ContentVariant&gt; List(ContentReference contentLink);
@@ -1603,7 +1603,7 @@ fr-BE            → nl-BE           → nl</code></pre>
 <h3>Creating Variations Programmatically</h3>
 <p>Create variations for A/B testing or personalization:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class VariationService
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public class VariationService
 {
     private readonly IContentVariantRepository _variantRepository;
     private readonly IContentRepository _contentRepository;
@@ -1635,7 +1635,7 @@ fr-BE            → nl-BE           → nl</code></pre>
 <h3>Querying Variations</h3>
 <p>Retrieve and filter variations:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// List all variations for a page
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// List all variations for a page
 var variations = _variantRepository.List(pageReference);
 
 foreach (var variant in variations)
@@ -1700,7 +1700,7 @@ foreach (var variant in variations)
 
 <h3>Variation Identifier Format</h3>
 <p>Variations in Graph follow this identifier pattern:</p>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>Guid_Status_Language_VariantKey
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>Guid_Status_Language_VariantKey
 
 Example:
 a1b2c3d4-5678-90ab-cdef-123456789abc_Published_en_experiment-v1</code></pre>
@@ -1708,7 +1708,7 @@ a1b2c3d4-5678-90ab-cdef-123456789abc_Published_en_experiment-v1</code></pre>
 <h3>Querying Variations with GraphQL</h3>
 <p>Retrieve specific variations:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query GetVariations($contentId: String!) {
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>query GetVariations($contentId: String!) {
   ArticlePage(
     where: {
       _metadata: {
@@ -1735,7 +1735,7 @@ a1b2c3d4-5678-90ab-cdef-123456789abc_Published_en_experiment-v1</code></pre>
 <h3>Filtering by Variation</h3>
 <p>Query a specific variation for A/B testing:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>query GetExperimentVariation {
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>query GetExperimentVariation {
   ArticlePage(
     where: {
       _variations: {
@@ -1837,7 +1837,7 @@ a1b2c3d4-5678-90ab-cdef-123456789abc_Published_en_experiment-v1</code></pre>
 </ul>
 
 <h3>Project File Updates</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>&lt;Project Sdk=""Microsoft.NET.Sdk.Web""&gt;
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>&lt;Project Sdk=""Microsoft.NET.Sdk.Web""&gt;
   &lt;PropertyGroup&gt;
     &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
     &lt;Nullable&gt;enable&lt;/Nullable&gt;
@@ -1995,7 +1995,7 @@ a1b2c3d4-5678-90ab-cdef-123456789abc_Published_en_experiment-v1</code></pre>
 </table>
 
 <h3>Before: ServiceLocator Pattern</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 approach (deprecated)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 approach (deprecated)
 public class MyService
 {
     public void DoSomething()
@@ -2007,7 +2007,7 @@ public class MyService
 }</code></pre>
 
 <h3>After: Constructor Injection</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 13 approach (recommended)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 13 approach (recommended)
 public class MyService
 {
     private readonly IContentLoader _contentLoader;
@@ -2026,7 +2026,7 @@ public class MyService
 <h3>Dynamic Resolution with IServiceProvider</h3>
 <p>When you need to resolve services dynamically (e.g., in factories):</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class ServiceFactory
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public class ServiceFactory
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -2049,7 +2049,7 @@ public class MyService
 <h3>Registering Services</h3>
 <p>Use standard ASP.NET Core patterns in <code>Startup.cs</code> or <code>Program.cs</code>:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>services.AddScoped&lt;IMyService, MyService&gt;();
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>services.AddScoped&lt;IMyService, MyService&gt;();
 services.AddSingleton&lt;ICacheService, CacheService&gt;();
 services.AddTransient&lt;IDataProcessor, DataProcessor&gt;();</code></pre>
 
@@ -2104,7 +2104,7 @@ services.AddTransient&lt;IDataProcessor, DataProcessor&gt;();</code></pre>
 </table>
 
 <h3>Code Migration Example</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
 public void ProcessPage(PageReference pageRef)
 {
     if (pageRef != PageReference.EmptyReference)
@@ -2125,7 +2125,7 @@ public void ProcessPage(ContentReference contentRef)
 <h3>IContentTypeRepository Changes</h3>
 <p>The <code>IContentTypeRepository</code> interface is now non-generic:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
 var contentType = contentTypeRepository.Load&lt;ArticlePage&gt;();
 
 // CMS 13
@@ -2150,7 +2150,7 @@ var contentType = contentTypeRepository.Load(typeof(ArticlePage));</code></pre>
 <h3>Scheduled Jobs Migration</h3>
 <p>If you have custom scheduled jobs using the plugin attribute:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
 [ScheduledPlugIn(DisplayName = ""My Job"")]
 public class MyScheduledJob : ScheduledJobBase
 {
@@ -2289,7 +2289,7 @@ public class MyScheduledJob : ScheduledJob
 <p>The <code>IApplicationRepository</code> interface provides programmatic access to manage applications in CMS 13.</p>
 
 <h3>Interface Overview</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public interface IApplicationRepository
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public interface IApplicationRepository
 {
     // Query operations
     Application Get(Guid id);
@@ -2302,7 +2302,7 @@ public class MyScheduledJob : ScheduledJob
 }</code></pre>
 
 <h3>Injecting the Repository</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class ApplicationService
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public class ApplicationService
 {
     private readonly IApplicationRepository _applicationRepository;
 
@@ -2313,7 +2313,7 @@ public class MyScheduledJob : ScheduledJob
 }</code></pre>
 
 <h3>Listing All Applications</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public IEnumerable&lt;ApplicationInfo&gt; GetAllApplications()
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public IEnumerable&lt;ApplicationInfo&gt; GetAllApplications()
 {
     return _applicationRepository.List()
         .Select(app => new ApplicationInfo
@@ -2326,14 +2326,14 @@ public class MyScheduledJob : ScheduledJob
 }</code></pre>
 
 <h3>Getting a Specific Application</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// By ID
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// By ID
 var application = _applicationRepository.Get(applicationId);
 
 // By name
 var application = _applicationRepository.GetByName(""corporate-site"");</code></pre>
 
 <h3>Creating a New Application</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public Guid CreateApplication(string name, ContentReference startPage)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public Guid CreateApplication(string name, ContentReference startPage)
 {
     var application = new Application
     {
@@ -2353,7 +2353,7 @@ var application = _applicationRepository.GetByName(""corporate-site"");</code></
 }</code></pre>
 
 <h3>Updating an Application</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public void UpdateApplicationHosts(Guid appId, IEnumerable&lt;string&gt; hostNames)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public void UpdateApplicationHosts(Guid appId, IEnumerable&lt;string&gt; hostNames)
 {
     var application = _applicationRepository.Get(appId);
 
@@ -2402,7 +2402,7 @@ var application = _applicationRepository.GetByName(""corporate-site"");</code></
 <p>The <code>IApplicationResolver</code> service resolves the current application based on the HTTP request context, replacing <code>SiteDefinition.Current</code>.</p>
 
 <h3>Interface</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public interface IApplicationResolver
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public interface IApplicationResolver
 {
     Application GetCurrentApplication();
     Application GetApplicationForRequest(HttpContext context);
@@ -2410,7 +2410,7 @@ var application = _applicationRepository.GetByName(""corporate-site"");</code></
 }</code></pre>
 
 <h3>Migration from SiteDefinition.Current</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
 var currentSite = SiteDefinition.Current;
 var startPage = currentSite.StartPage;
 
@@ -2433,7 +2433,7 @@ public class MyController : Controller
 }</code></pre>
 
 <h3>Getting Current Application</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class NavigationService
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public class NavigationService
 {
     private readonly IApplicationResolver _resolver;
     private readonly IContentLoader _contentLoader;
@@ -2459,7 +2459,7 @@ public class MyController : Controller
 }</code></pre>
 
 <h3>Host-Based Resolution</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Resolve application by specific host
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Resolve application by specific host
 var app = _applicationResolver.GetApplicationByHost(""www.corporate.com"");
 
 // Useful for:
@@ -2470,7 +2470,7 @@ var app = _applicationResolver.GetApplicationByHost(""www.corporate.com"");
 <h3>Multi-Tenant Scenarios</h3>
 <p>For SaaS or multi-tenant deployments:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class TenantService
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public class TenantService
 {
     private readonly IApplicationResolver _resolver;
 
@@ -2531,7 +2531,7 @@ var app = _applicationResolver.GetApplicationByHost(""www.corporate.com"");
 <h3>Host Configuration</h3>
 <p>Configure domains and hosts for your application:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>var application = new Application
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>var application = new Application
 {
     Name = ""Corporate Site"",
     StartPage = startPageReference,
@@ -2574,7 +2574,7 @@ var app = _applicationResolver.GetApplicationByHost(""www.corporate.com"");
 </table>
 
 <h3>Language Configuration</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Configure host-specific languages
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Configure host-specific languages
 var host = new HostDefinition
 {
     Name = ""www.corporate.de"",
@@ -2592,7 +2592,7 @@ var host = new HostDefinition
 </ol>
 
 <h3>Programmatic Settings Access</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public class ApplicationSettingsService
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public class ApplicationSettingsService
 {
     private readonly IApplicationResolver _resolver;
 
@@ -2739,7 +2739,7 @@ var host = new HostDefinition
 <h3>Preview URL Pattern</h3>
 <p>Configure in your application settings:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>{
   ""Optimizely"": {
     ""Preview"": {
       ""BaseUrl"": ""https://frontend.example.com"",
@@ -2768,14 +2768,14 @@ var host = new HostDefinition
 </table>
 
 <h3>Example Preview URL</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>https://frontend.example.com/api/preview?
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>https://frontend.example.com/api/preview?
   token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   &amp;contentId=a1b2c3d4-5678-90ab-cdef-123456789abc
   &amp;locale=en
   &amp;variation=experiment-v1</code></pre>
 
 <h3>Frontend Preview Handler (Next.js Example)</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// pages/api/preview.ts
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// pages/api/preview.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -2804,7 +2804,7 @@ export default async function handler(
 }</code></pre>
 
 <h3>Token Validation</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Validate token against CMS endpoint
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Validate token against CMS endpoint
 async function validatePreviewToken(token: string): Promise&lt;boolean&gt; {
   const response = await fetch(
     `${process.env.CMS_URL}/api/preview/validate`,
@@ -2851,7 +2851,7 @@ async function validatePreviewToken(token: string): Promise&lt;boolean&gt; {
 <h3>Cross-Origin Configuration</h3>
 <p>Your frontend needs proper CORS and frame policies:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// next.config.js (Next.js)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// next.config.js (Next.js)
 module.exports = {
   async headers() {
     return [
@@ -2875,7 +2875,7 @@ module.exports = {
 <h3>Communication Protocol</h3>
 <p>Visual Builder and your frontend communicate via <code>postMessage</code>:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Frontend: Listen for CMS messages
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Frontend: Listen for CMS messages
 window.addEventListener('message', (event) => {
   // Verify origin
   if (event.origin !== process.env.CMS_URL) return;
@@ -2903,7 +2903,7 @@ window.parent.postMessage({
 <h3>Live Preview Updates</h3>
 <p>For real-time updates as editors type:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Poll Graph for changes (simple approach)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Poll Graph for changes (simple approach)
 useEffect(() => {
   if (!previewMode) return;
 
@@ -3064,7 +3064,7 @@ useEffect(() => {
 <h3>Creating a Deployment Slot</h3>
 <p>To initiate a smooth rebuild:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Programmatic slot creation
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Programmatic slot creation
 public class SmoothRebuildService
 {
     private readonly IGraphSyncService _graphSync;
@@ -3115,7 +3115,7 @@ public class SmoothRebuildService
 </ul>
 
 <h3>Committing a Slot</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Commit the slot to go live
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Commit the slot to go live
 await _graphSync.CommitDeploymentSlot(slotId);
 
 // Traffic now served from new slot</code></pre>
@@ -3123,7 +3123,7 @@ await _graphSync.CommitDeploymentSlot(slotId);
 <h3>Abandoning a Slot</h3>
 <p>If something is wrong, abandon without impact:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Abandon slot (no effect on live traffic)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Abandon slot (no effect on live traffic)
 await _graphSync.AbandonDeploymentSlot(slotId);
 
 // Original index continues serving traffic</code></pre>
@@ -3189,7 +3189,7 @@ await _graphSync.AbandonDeploymentSlot(slotId);
 <h3>CI/CD Integration</h3>
 <p>Automate smooth rebuilds in your deployment pipeline:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code># Azure DevOps pipeline example
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code># Azure DevOps pipeline example
 stages:
   - stage: Deploy
     jobs:
@@ -3362,7 +3362,7 @@ stages:
 <h3>Update Project File</h3>
 <p>Modify your <code>.csproj</code> file:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>&lt;Project Sdk=""Microsoft.NET.Sdk.Web""&gt;
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>&lt;Project Sdk=""Microsoft.NET.Sdk.Web""&gt;
   &lt;PropertyGroup&gt;
     &lt;!-- CMS 12 --&gt;
     &lt;!-- &lt;TargetFramework&gt;net6.0&lt;/TargetFramework&gt; --&gt;
@@ -3378,7 +3378,7 @@ stages:
 <h3>Install .NET 10 SDK</h3>
 <p>Ensure your development environment has .NET 10:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code># Check current SDK version
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code># Check current SDK version
 dotnet --version
 
 # Download .NET 10 SDK from Microsoft
@@ -3387,7 +3387,7 @@ dotnet --version
 <h3>Update NuGet Packages</h3>
 <p>Update Optimizely packages to CMS 13 versions:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>&lt;ItemGroup&gt;
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>&lt;ItemGroup&gt;
   &lt;!-- Core CMS packages --&gt;
   &lt;PackageReference Include=""EPiServer.CMS"" Version=""13.0.0"" /&gt;
   &lt;PackageReference Include=""EPiServer.CMS.AspNetCore"" Version=""13.0.0"" /&gt;
@@ -3399,7 +3399,7 @@ dotnet --version
 &lt;/ItemGroup&gt;</code></pre>
 
 <h3>Package Update Commands</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code># Update all Optimizely packages
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code># Update all Optimizely packages
 dotnet add package EPiServer.CMS --version 13.0.0
 dotnet add package EPiServer.CMS.AspNetCore --version 13.0.0
 dotnet add package EPiServer.CMS.UI --version 13.0.0
@@ -3427,7 +3427,7 @@ dotnet restore</code></pre>
 <h3>global.json Configuration</h3>
 <p>Pin your SDK version for consistent builds:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>{
   ""sdk"": {
     ""version"": ""10.0.100"",
     ""rollForward"": ""latestMinor""
@@ -3474,7 +3474,7 @@ dotnet restore</code></pre>
 </table>
 
 <h3>Migration Example: Static Access</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 - Static access (deprecated)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 - Static access (deprecated)
 public class NavigationHelper
 {
     public ContentReference GetStartPage()
@@ -3500,7 +3500,7 @@ public class NavigationHelper
 }</code></pre>
 
 <h3>Migration Example: Repository</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 12
 public class SiteService
 {
     private readonly ISiteDefinitionRepository _siteRepo;
@@ -3597,7 +3597,7 @@ public class SiteService
 </ol>
 
 <h3>Step 2: Configure appsettings.json</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>{
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>{
   ""Optimizely"": {
     ""Graph"": {
       ""GatewayAddress"": ""https://graph.optimizely.com"",
@@ -3611,7 +3611,7 @@ public class SiteService
 <h3>Step 3: Register Services</h3>
 <p>Update your <code>Startup.cs</code> or <code>Program.cs</code>:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>public void ConfigureServices(IServiceCollection services)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>public void ConfigureServices(IServiceCollection services)
 {
     services.AddCms()
             .AddContentGraph()    // Required for CMS 13
@@ -3628,7 +3628,7 @@ public class SiteService
 </ol>
 
 <h3>Verification Steps</h3>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Test Graph connectivity
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Test Graph connectivity
 public class GraphHealthCheck
 {
     private readonly IGraphClient _graphClient;
@@ -3691,7 +3691,7 @@ public class GraphHealthCheck
 <h3>1. Projects Feature</h3>
 <p>The Projects feature is <strong>not supported</strong> in CMS 13 and must be disabled:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Disable Projects in configuration
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Disable Projects in configuration
 services.Configure&lt;ProjectOptions&gt;(options =>
 {
     options.Enabled = false;
@@ -3714,7 +3714,7 @@ services.Configure&lt;ProjectOptions&gt;(options =>
 </ul>
 
 <h4>Scheduled Job Migration</h4>
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// CMS 12 (deprecated)
 [ScheduledPlugIn(DisplayName = ""My Job"")]
 public class MyJob : ScheduledJobBase
 {
@@ -3746,7 +3746,7 @@ public class MyJob : ScheduledJob
 <h3>4. ServiceLocator Pattern</h3>
 <p>While not completely removed, ServiceLocator is deprecated:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Find all usages
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Find all usages
 // Search for: ServiceLocator.Current
 
 // Replace with constructor injection or IServiceProvider</code></pre>
@@ -3754,7 +3754,7 @@ public class MyJob : ScheduledJob
 <h3>5. PageReference</h3>
 <p>Replace all <code>PageReference</code> with <code>ContentReference</code>:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Search and replace:
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Search and replace:
 // PageReference → ContentReference
 // PageReference.EmptyReference → ContentReference.EmptyReference
 // PageReference.StartPage → ContentReference.StartPage</code></pre>
@@ -3872,7 +3872,7 @@ public class MyJob : ScheduledJob
 <h3>Performance Baseline</h3>
 <p>Establish performance baselines for comparison:</p>
 
-<pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>// Key metrics to measure
+<pre class=""bg-gray-900 text-gray-100 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto""><code>// Key metrics to measure
 - Page load time (frontend)
 - API response times
 - Graph query latency
