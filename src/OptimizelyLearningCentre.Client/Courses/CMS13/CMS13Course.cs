@@ -4,17 +4,17 @@ using OptimizelyLearningCentre.Client.Models.Course;
 namespace OptimizelyLearningCentre.Client.Courses.CMS13;
 
 /// <summary>
-/// Course definition for Optimizely CMS 13 (Pre-Release)
+/// Course definition for Optimizely CMS 13
 /// </summary>
 public static class CMS13Course
 {
     public static CourseDefinition Definition => new()
     {
         Id = "cms13",
-        Name = "Optimizely CMS 13 (Pre-Release)",
-        Description = "Explore the upcoming features in Optimizely CMS 13 with integrated Optimizely Graph",
-        LongDescription = "Discover the future of Optimizely CMS with CMS 13 Pre-Release. Learn about the enhanced Visual Builder, Content Manager integration with Optimizely Graph, content variations, multilingual improvements, and the migration path from CMS 12.",
-        Icon = "rocket-launch",
+        Name = "Optimizely CMS 13",
+        Description = "Learn to build and manage content with Optimizely CMS 13 and integrated Optimizely Graph",
+        LongDescription = "Master Optimizely CMS 13 with its deep Optimizely Graph integration. Learn about the enhanced Visual Builder, Content Manager, content variations, multilingual improvements, and the migration path from CMS 12.",
+        Icon = "server",
         BrandColor = "#8B5CF6",
         ContentProviderType = typeof(CMS13ContentProvider),
         InteractivePanelType = typeof(CodePanel),
@@ -55,8 +55,8 @@ public static class CMS13Course
         {
             new()
             {
-                Title = "CMS 13 Pre-Release Docs",
-                Url = "https://docs.developers.optimizely.com/content-management-system/v13-Pre-Release/docs/overview-of-cms-13-pre-release",
+                Title = "CMS 13 Documentation",
+                Url = "https://docs.developers.optimizely.com/content-management-system/v13.0.0-CMS/docs/cms-13-overview",
                 Icon = "document-text"
             },
             new()

@@ -4,7 +4,7 @@ using OptimizelyLearningCentre.Client.Services;
 namespace OptimizelyLearningCentre.Client.Courses.CMS13;
 
 /// <summary>
-/// Content provider for the Optimizely CMS 13 (Pre-Release) course
+/// Content provider for the Optimizely CMS 13 course
 /// </summary>
 public class CMS13ContentProvider : ILearningContentProvider
 {
@@ -73,9 +73,9 @@ public class CMS13ContentProvider : ILearningContentProvider
         return new LearningModule
         {
             Id = "overview",
-            Title = "Overview of CMS 13 Pre-Release",
-            Description = "Discover the new features and enhancements in Optimizely CMS 13 pre-release.",
-            Icon = "rocket-launch",
+            Title = "Overview of CMS 13",
+            Description = "Discover the new features and enhancements in Optimizely CMS 13.",
+            Icon = "server",
             Order = 1,
             Difficulty = ModuleDifficulty.Beginner,
             Lessons = new List<Lesson>
@@ -85,7 +85,7 @@ public class CMS13ContentProvider : ILearningContentProvider
                     Id = "ov-introduction",
                     ModuleId = "overview",
                     Title = "What's New in CMS 13",
-                    Summary = "Get an overview of the major features and enhancements in the CMS 13 pre-release.",
+                    Summary = "Get an overview of the major features and enhancements in CMS 13.",
                     Order = 1,
                     EstimatedMinutes = 10,
                     LearningObjectives = new List<string>
@@ -95,8 +95,8 @@ public class CMS13ContentProvider : ILearningContentProvider
                         "Discover improvements to content management and editing"
                     },
                     Content = @"
-<h2>Welcome to CMS 13 Pre-Release</h2>
-<p>Optimizely CMS 13 represents a significant evolution of the platform, with a <strong>strong focus on integration with Optimizely Graph</strong>. This pre-release provides an early look at the features and enhancements that will shape the future of content management with Optimizely.</p>
+<h2>Welcome to CMS 13</h2>
+<p>Optimizely CMS 13 represents a significant evolution of the platform, with a <strong>strong focus on integration with Optimizely Graph</strong>. This release introduces enhanced content management, editing, and delivery capabilities that shape the future of content management with Optimizely.</p>
 
 <h3>Key Feature Areas</h3>
 
@@ -106,16 +106,25 @@ public class CMS13ContentProvider : ILearningContentProvider
     <li><strong>New Content Manager</strong> - A search-first approach powered by Optimizely Graph</li>
     <li><strong>Enhanced Visual Builder</strong> - Improved WYSIWYG editing with templates and blueprints</li>
     <li><strong>In-context editing</strong> - Edit content directly within Visual Builder</li>
-    <li><strong>Customizable columns</strong> - Configure list views in Content Manager</li>
+    <li><strong>Content Variations</strong> - Multiple published versions for A/B testing, personalization, and seasonal content</li>
+    <li><strong>DAM Integration</strong> - Browse and select digital assets directly within the editing interface</li>
 </ul>
 
 <h4>Graph Integration</h4>
 <p>Optimizely Graph is now a core component of CMS 13:</p>
 <ul>
     <li><strong>Content retrieval</strong> - Graph is mandatory for content retrieval operations</li>
+    <li><strong>Graph C# SDK</strong> - Fluent .NET API with typed deserialization, filtering, and pagination</li>
     <li><strong>External content</strong> - Surface external content sources in the CMS UI</li>
     <li><strong>Search capabilities</strong> - Full-text search, filtering, and faceted navigation</li>
-    <li><strong>Global contracts</strong> - Consistent content indexing across sources</li>
+</ul>
+
+<h4>AI &amp; Automation</h4>
+<p>Integrated AI capabilities through Optimizely Opal:</p>
+<ul>
+    <li><strong>Opal Chat</strong> - Generative AI agent orchestration within the CMS</li>
+    <li><strong>Content creation</strong> - AI-assisted content generation and optimization</li>
+    <li><strong>Translation workflows</strong> - AI-powered translation preserving content structure</li>
 </ul>
 
 <h4>Multilingual Support</h4>
@@ -130,13 +139,12 @@ public class CMS13ContentProvider : ILearningContentProvider
 <p>Modernized development platform:</p>
 <ul>
     <li><strong>.NET 10 runtime</strong> - Built on the latest .NET platform</li>
+    <li><strong>CMS REST API</strong> - Programmatic content management included via <code>AddCms()</code></li>
     <li><strong>Custom elements</strong> - Define custom elements in the Admin UI</li>
+    <li><strong>React components</strong> - Support for React-based UI extensions</li>
     <li><strong>Simplified plugin architecture</strong> - Plugin Manager removed in favor of modern patterns</li>
 </ul>
 
-<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
-    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Pre-Release Notice:</strong> This is a pre-release version of CMS 13. Some features may change before the final release, and certain functionality may not yet be fully enabled.</p>
-</div>
 "
                 },
                 new Lesson
@@ -187,7 +195,7 @@ public class CMS13ContentProvider : ILearningContentProvider
 <pre class=""bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto""><code>services.AddContentGraph()</code></pre>
 
 <div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
-    <p class=""text-blue-800 dark:text-blue-100""><strong>Note:</strong> The .NET SDK for Graph is not yet included in the pre-release version but will be available in the final release.</p>
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Note:</strong> The Graph C# SDK provides a fluent .NET API for querying Optimizely Graph with typed deserialization, filtering, ordering, and pagination support.</p>
 </div>
 "
                 },
@@ -195,92 +203,97 @@ public class CMS13ContentProvider : ILearningContentProvider
                 {
                     Id = "ov-not-included",
                     ModuleId = "overview",
-                    Title = "What's NOT in CMS 13 Pre-Release",
-                    Summary = "Learn about features and functionality that are explicitly excluded from the CMS 13 pre-release.",
+                    Title = "Known Limitations & Migration Considerations",
+                    Summary = "Understand the key architectural changes, known limitations, and important considerations when working with or migrating to CMS 13.",
                     Order = 3,
-                    EstimatedMinutes = 8,
+                    EstimatedMinutes = 10,
                     LearningObjectives = new List<string>
                     {
-                        "Understand which major features are excluded from the pre-release",
-                        "Know the implications for your evaluation and planning",
-                        "Identify workarounds or alternative approaches"
+                        "Understand key architectural changes from CMS 12",
+                        "Know what has changed in the editing and content management experience",
+                        "Plan your adoption with awareness of breaking changes"
                     },
                     Content = @"
-<h2>Features NOT in CMS 13 Pre-Release</h2>
-<p>The CMS 13 pre-release excludes several significant features. Understanding these exclusions is essential for planning your evaluation and migration strategy.</p>
+<h2>Known Limitations &amp; Migration Considerations</h2>
+<p>CMS 13 is now generally available and introduces major architectural changes from CMS 12. Understanding these changes, available features, and remaining considerations is essential for a successful adoption or migration.</p>
 
-<div class=""bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4 my-4"">
-    <p class=""text-red-800 dark:text-red-100""><strong>Important:</strong> The following features are explicitly NOT available in this pre-release version.</p>
-</div>
+<h3>Architectural Changes from CMS 12</h3>
 
-<h3>Major Feature Exclusions</h3>
+<h4>1. Optimizely Graph is Mandatory</h4>
+<p>Unlike CMS 12 where Graph was optional, <strong>Optimizely Graph is now a required component</strong> in CMS 13. It serves as the core architecture for content retrieval and powers the Content Manager's search-first navigation. You must have an active Graph subscription configured for CMS 13 to function.</p>
 
-<h4>1. Opal Integration</h4>
-<p><strong>Opal integration is not enabled in CMS 13 pre-release.</strong></p>
-<p>The AI-powered content assistant and personalization capabilities provided by Opal are not available. If your workflows depend on Opal for content generation or optimization, you'll need to continue using your existing CMS version for those capabilities.</p>
+<h4>2. On-Page Edit (OPE) Replaced by Visual Builder</h4>
+<p>Traditional On-Page Edit is <strong>no longer available</strong>. Visual Builder is the default and primary editing experience, offering drag-and-drop composition, real-time preview, autosave, and direct property editing. Plan for editor retraining if your team relies on OPE workflows.</p>
 
-<h4>2. DAM (Digital Asset Management)</h4>
-<p><strong>DAM integration is not enabled in CMS 13 pre-release.</strong></p>
-<p>Digital Asset Management functionality is not currently supported. Organizations relying on DAM integration for media management should plan accordingly.</p>
+<h4>3. Site Definitions Replaced by Applications</h4>
+<p>The concept of Site Definitions has been replaced by <strong>Applications</strong>. This affects routing, multi-site configuration, and how sites are managed in the admin interface. Existing site definition configurations must be migrated to the new Applications model.</p>
 
-<h4>3. Projects Feature</h4>
-<p><strong>Projects are not supported in CMS 13 pre-release and must be disabled to launch the CMS.</strong></p>
-<p>The Projects feature for coordinating content workflows and releases is not available. In fact, Projects must be explicitly disabled for CMS 13 to function properly in this release.</p>
+<h4>4. Plugin Manager Removed</h4>
+<p>The legacy Plugin Manager has been removed in favor of modern .NET dependency injection patterns. Any custom plugins using the old architecture must be refactored to use standard ASP.NET Core service registration.</p>
 
-<h4>4. Forms for Visual Builder</h4>
-<p><strong>Forms for Visual Builder is not supported in CMS 13 pre-release.</strong></p>
-<p>Form creation and integration within Visual Builder is unavailable. If you need form capabilities, you'll need to implement alternative solutions or wait for a future release.</p>
+<h4>5. Opti ID Required</h4>
+<p><strong>Opti ID is mandatory</strong> for CMS 13, providing single sign-on (SSO) with multi-factor authentication (MFA) and SCIM provisioning. This replaces the previous authentication mechanisms.</p>
 
-<h4>5. REST API</h4>
-<p><strong>REST API is not available in the CMS 13 pre-release.</strong></p>
-<p>Programmatic access through REST endpoints is not supported. This affects any integrations or automation that rely on the REST API for content management operations.</p>
+<h3>Features Available in CMS 13 GA</h3>
+<p>The following features, which were not available during the pre-release period, are now included in the GA release:</p>
 
-<h3>Additional Technical Limitations</h3>
+<table class=""min-w-full divide-y divide-gray-200 dark:divide-gray-700 my-4"">
+    <thead>
+        <tr>
+            <th class=""px-4 py-2 text-left"">Feature</th>
+            <th class=""px-4 py-2 text-left"">Status</th>
+            <th class=""px-4 py-2 text-left"">Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class=""px-4 py-2"">Optimizely Opal</td><td class=""px-4 py-2""><span class=""text-green-600 font-semibold"">Available</span></td><td class=""px-4 py-2"">AI agent orchestration for content creation, translation, and workflow automation</td></tr>
+        <tr><td class=""px-4 py-2"">DAM Integration</td><td class=""px-4 py-2""><span class=""text-green-600 font-semibold"">Available</span></td><td class=""px-4 py-2"">Asset picker for browsing and selecting digital assets within the editing interface</td></tr>
+        <tr><td class=""px-4 py-2"">CMS REST API</td><td class=""px-4 py-2""><span class=""text-green-600 font-semibold"">Available</span></td><td class=""px-4 py-2"">Included via <code>AddCms()</code> registration for programmatic content management</td></tr>
+        <tr><td class=""px-4 py-2"">Graph C# SDK</td><td class=""px-4 py-2""><span class=""text-green-600 font-semibold"">Available</span></td><td class=""px-4 py-2"">Fluent .NET API with typed deserialization, filtering, ordering, and pagination</td></tr>
+        <tr><td class=""px-4 py-2"">Projects</td><td class=""px-4 py-2""><span class=""text-green-600 font-semibold"">Available</span></td><td class=""px-4 py-2"">Content workflow coordination and release management</td></tr>
+        <tr><td class=""px-4 py-2"">Forms</td><td class=""px-4 py-2""><span class=""text-green-600 font-semibold"">Available</span></td><td class=""px-4 py-2"">Form creation and integration within Visual Builder</td></tr>
+        <tr><td class=""px-4 py-2"">Smooth Rebuild</td><td class=""px-4 py-2""><span class=""text-green-600 font-semibold"">Available</span></td><td class=""px-4 py-2"">Reset Graph sources without downtime during reindexing</td></tr>
+    </tbody>
+</table>
 
-<h4>Graph SDK</h4>
-<p>The .NET SDK for Optimizely Graph is not yet fully included. Pending capabilities:</p>
+<h3>Remaining Considerations</h3>
+
+<h4>Content Variations</h4>
 <ul>
-    <li>Full LINQ provider support</li>
-    <li>Direct link support (use <code>IContentLoader.GetAncestors()</code> instead)</li>
-    <li>Recursive directives (use <code>IContentLoader.Get()</code>)</li>
-    <li>Routing support</li>
-    <li>Single document retrieval by ID</li>
-    <li>Multi-search capabilities</li>
+    <li>Only localizable properties are supported for variations</li>
+    <li>Softlinks are not generated for published variations</li>
 </ul>
 
-<h4>On-Page Edit (OPE)</h4>
-<p>Traditional On-Page Edit is disabled in favor of the new Visual Builder experience.</p>
+<h4>Search &amp; Navigation Removed</h4>
+<p>The legacy Search &amp; Navigation (formerly Find) is no longer available. All search functionality must use Optimizely Graph or a custom search provider.</p>
 
-<h4>Smooth Rebuild</h4>
-<p>The Smooth Rebuild feature for resetting Graph sources without downtime has not been enabled yet.</p>
-
-<h4>Content Manager Features</h4>
-<p>Some Content Manager capabilities are not yet available:</p>
+<h3>Breaking Changes</h3>
+<p>CMS 13 includes breaking changes across nine categories. Review these carefully before migrating:</p>
 <ul>
-    <li>Custom columns</li>
-    <li>Saved view configurations</li>
-    <li>Session persistence</li>
-    <li>Content Manager as content selector</li>
-    <li>Content Sources/Contracts</li>
+    <li><strong>Framework and platform</strong> - .NET 10 runtime, removed APIs</li>
+    <li><strong>Content types and properties</strong> - Property definition changes</li>
+    <li><strong>Content management and repository</strong> - Repository operation changes</li>
+    <li><strong>Sites to Applications and routing</strong> - New routing model</li>
+    <li><strong>Security and access control</strong> - Opti ID requirement</li>
+    <li><strong>Scheduling, plugins, and events</strong> - Plugin Manager removal</li>
+    <li><strong>UI, editors, and shell</strong> - Visual Builder as default</li>
+    <li><strong>Localization and import/export</strong> - Translation workflow changes</li>
+    <li><strong>Third-party package compatibility</strong> - Package updates required</li>
 </ul>
 
-<h4>Content Variations Limitations</h4>
+<h3>Planning Your Adoption</h3>
+<p>When planning your CMS 13 migration or new implementation, consider:</p>
 <ul>
-    <li>Only localizable properties are supported</li>
-    <li>Softlinks aren't generated for published variations</li>
+    <li><strong>Breaking changes review</strong> - Thoroughly review the official breaking changes documentation for each category</li>
+    <li><strong>Graph subscription</strong> - Ensure your Optimizely Graph subscription and configuration are ready</li>
+    <li><strong>Opti ID setup</strong> - Configure Opti ID for authentication before migration</li>
+    <li><strong>Editor training</strong> - Visual Builder replaces On-Page Edit; plan retraining for content editors</li>
+    <li><strong>Code audit</strong> - Identify custom code using removed APIs (Plugin Manager, Site Definitions, OPE)</li>
+    <li><strong>Testing strategy</strong> - Validate all integrations and custom functionality against CMS 13</li>
 </ul>
 
-<h3>Planning Your Evaluation</h3>
-<p>When evaluating CMS 13 pre-release, consider:</p>
-<ul>
-    <li><strong>Feature dependencies</strong> - Identify if your current implementation relies on any excluded features</li>
-    <li><strong>Timeline planning</strong> - Factor in that these features will arrive in future releases</li>
-    <li><strong>Testing scope</strong> - Focus evaluation on features that ARE available in the pre-release</li>
-    <li><strong>Hybrid approach</strong> - Consider running CMS 13 pre-release alongside existing systems for testing</li>
-</ul>
-
-<div class=""bg-gray-50 dark:bg-gray-800 border-l-4 border-gray-400 p-4 my-4"">
-    <p class=""text-gray-800 dark:text-gray-200""><strong>Stay Updated:</strong> Check the <a href=""https://docs.developers.optimizely.com/content-management-system/v13-Pre-Release/docs/not-in-cms-13-pre-release"" target=""_blank"" class=""text-violet-600 hover:underline"">official documentation</a> regularly for updates on feature availability as the pre-release progresses toward general availability.</p>
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Official Documentation:</strong> Refer to the <a href=""https://docs.developers.optimizely.com/content-management-system/v13.0.0-CMS/docs/cms-13-overview"" target=""_blank"" class=""text-blue-600 hover:underline"">CMS 13 documentation</a> for the complete list of breaking changes, migration guides, and API replacement maps.</p>
 </div>
 "
                 }
@@ -603,7 +616,7 @@ public class CMS13ContentProvider : ILearningContentProvider
         .AddContentManager();</code></pre>
 
 <div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
-    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Important:</strong> The order of service calls matters during the preview phase. Always call <code>AddContentGraph()</code> before <code>AddContentManager()</code>.</p>
+    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Important:</strong> The order of service calls matters. Always call <code>AddContentGraph()</code> before <code>AddContentManager()</code>.</p>
 </div>
 "
                 },
@@ -810,7 +823,7 @@ public class CMS13ContentProvider : ILearningContentProvider
                     },
                     Content = @"
 <h2>Visual Builder as Default Editor</h2>
-<p>In CMS 13 pre-release, <strong>On-Page Edit (OPE) is disabled</strong> in favor of Visual Builder. This represents a significant shift in the editing paradigm.</p>
+<p>In CMS 13, <strong>On-Page Edit (OPE) is disabled</strong> in favor of Visual Builder. This represents a significant shift in the editing paradigm.</p>
 
 <h3>Why This Change?</h3>
 <p>Visual Builder provides a more consistent and powerful editing experience:</p>
@@ -1221,8 +1234,8 @@ public class CMS13ContentProvider : ILearningContentProvider
     <li>Progress monitoring</li>
 </ul>
 
-<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
-    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Pre-Release Note:</strong> Smooth Rebuild has not been fully enabled yet and will be available following the Graph team's official release.</p>
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Note:</strong> Smooth Rebuild allows resetting Graph sources without downtime. Ensure your Optimizely Graph instance is properly configured before using this feature.</p>
 </div>
 "
                 }
@@ -3017,8 +3030,8 @@ useEffect(() => {
     <li>As part of deployment pipelines</li>
 </ul>
 
-<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
-    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Pre-Release Note:</strong> Smooth Rebuild has not been fully enabled yet in the CMS 13 pre-release. It will be available following the Graph team's official release.</p>
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Note:</strong> Smooth Rebuild allows resetting Graph sources without downtime. Ensure your Optimizely Graph instance is properly configured before using this feature.</p>
 </div>
 "
                 },
@@ -3323,8 +3336,8 @@ stages:
     <li><strong>Staged rollout</strong> - Consider migrating dev → staging → production</li>
 </ul>
 
-<div class=""bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 my-4"">
-    <p class=""text-yellow-800 dark:text-yellow-100""><strong>Important:</strong> CMS 13 is currently in pre-release. Plan your migration timeline to account for the final GA release.</p>
+<div class=""bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 my-4"">
+    <p class=""text-blue-800 dark:text-blue-100""><strong>Note:</strong> CMS 13 is now generally available. Review the <a href=""https://docs.developers.optimizely.com/content-management-system/v13.0.0-CMS/docs/cms-13-overview"" target=""_blank"" class=""text-blue-600 hover:underline"">official upgrade documentation</a> for the latest migration guidance.</p>
 </div>
 "
                 },

@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Optimizely Learning Centre is a **Blazor WebAssembly (WASM)** interactive multi-course learning platform for Optimizely products. This is a client-side only application with no backend server.
+Optimizely Learning Centre is a **Blazor WebAssembly (WASM)** interactive multi-course learning platform for Optimizely products. This is a client-side only application with no backend server. Deployed to **Azure Static Web Apps** (see `wwwroot/staticwebapp.config.json`).
 
-**Available Courses:** Graph, Opal, SaaS, CMS12, CMS13, DXP, CMP, WebExp, FeatureExp, Commerce, ContentRecs, ODP, ConfiguredCommerce, Analytics
+**Available Courses:** Graph, Opal, SaaS, CMS12, CMS13, DXP, CMP, WebExp, FeatureExp, Commerce, ContentRecs, ODP, ConfiguredCommerce, Analytics, ProductRecs, Pim
 
 ## Build Commands
 
@@ -31,7 +31,7 @@ cd src/OptimizelyLearningCentre.Client && npm run css:watch
 ### Technology Stack
 - **.NET 10.0** with **Blazor WebAssembly**
 - **C# 13+** with nullable reference types enabled
-- **Tailwind CSS 3.4** for styling
+- **Tailwind CSS 3.4** for styling (with `@tailwindcss/forms` and `@tailwindcss/typography` plugins)
 - **Blazored.LocalStorage** for browser persistence
 
 ### Multi-Course Architecture
@@ -48,16 +48,28 @@ builder.Services.AddSingleton<ICourseRegistry>(sp => {
 ```
 
 **Each course provides:**
-- `CourseDefinition` - Metadata, nav items, brand colors, external links
-- `ContentProvider` - Implements `ILearningContentProvider` with modules and lessons
-- Course-specific pages (e.g., `Settings.razor`, `Playground.razor`)
-- Optional interactive components (e.g., `TryItPanel`)
+- `CourseDefinition` - Metadata, nav items, brand colors, external links, and `InteractivePanelType` (the Blazor component type rendered in lessons)
+- `ContentProvider` - Implements `ILearningContentProvider` with modules, lessons, and `LessonExample` objects
+- Course-specific pages (e.g., `{CourseName}Settings.razor`)
+- Optional interactive components (e.g., `TryItPanel`, `PromptPanel`, `CodePanel`)
 
 **Course folder structure** (`Courses/{CourseName}/`):
 - `{CourseName}Course.cs` - Static `CourseDefinition`
 - `{CourseName}ContentProvider.cs` - Module/lesson content (often large files)
 - `Pages/` - Course-specific Razor pages
-- `Components/` - Course-specific components
+- `Components/` - Course-specific interactive panel components
+
+### Routing Convention
+All course routes are prefixed with `/courses/{CourseId}/`:
+- `/` - Course catalog (shared `Index.razor`)
+- `/courses/{CourseId}` - Course home (`Home.razor`)
+- `/courses/{CourseId}/learn` - Module listing (`Learn/Index.razor`)
+- `/courses/{CourseId}/learn/{ModuleId}` and `/courses/{CourseId}/learn/{ModuleId}/{LessonId}` - Lesson view (`Learn/Module.razor`)
+- `/courses/{CourseId}/settings` - Course-specific settings pages (each in `Courses/{Name}/Pages/`)
+- `/courses/graph/query-builder` and `/courses/graph/playground` - Graph-only tool pages
+
+### Content Model
+Lessons contain `LessonExample` objects with an `ExampleType` enum: `Query` (GraphQL), `Prompt` (AI), `Code`, or `Configuration`. Each course's `InteractivePanelType` determines how examples render (e.g., Graph uses `TryItPanel` for executable GraphQL, Opal uses `PromptPanel`).
 
 ### State Management
 Property-based state stores implementing `INotifyPropertyChanged`:
@@ -66,7 +78,7 @@ Property-based state stores implementing `INotifyPropertyChanged`:
 
 ### Core Services (Scoped in DI)
 - **ICourseRegistry** (Singleton) - Manages registered courses
-- **ICourseContext** - Current course context and navigation
+- **ICourseContext** - Current course context and navigation; namespaces localStorage keys per course via `GetStorageKey()`
 - **ILearningService** - Orchestrates learning content across courses
 - **ISettingsService** - Persists settings to browser localStorage
 
@@ -74,10 +86,6 @@ Property-based state stores implementing `INotifyPropertyChanged`:
 - **IGraphQLClient** - Executes queries with HMAC, SingleKey, or no auth
 - **ISchemaService** - Schema introspection with caching
 - **IQueryBuilderService** - Constructs GraphQL queries from definitions
-
-### Shared vs Course-Specific Pages
-**Shared pages** (`Pages/`): Home, Learn/Index, Learn/Module, About, NotFound
-**Course pages** (`Courses/{Course}/Pages/`): Settings, Playground, QueryBuilder
 
 ## Styling
 
@@ -89,11 +97,14 @@ Tailwind is configured with custom Optimizely brand colors in `tailwind.config.j
 
 Source CSS: `Styles/app.css` → Compiled: `wwwroot/css/app.css`
 
+**Important:** After modifying Razor files that use new Tailwind classes, rebuild CSS with `npm run css:build`. Tailwind scans `.razor` files in `Layout/`, `Components/`, `Pages/`, `Courses/`, and root.
+
 ## Adding a New Course
 
 1. Create folder `Courses/{CourseName}/`
-2. Add `{CourseName}Course.cs` with static `Definition` property
+2. Add `{CourseName}Course.cs` with static `Definition` property (must set `ContentProviderType` and `InteractivePanelType`)
 3. Add `{CourseName}ContentProvider.cs` implementing `ILearningContentProvider`
 4. Register in `Program.cs`: `registry.RegisterCourse({CourseName}Course.Definition)`
 5. Register content provider: `builder.Services.AddScoped<{CourseName}ContentProvider>()`
-6. Add course-specific pages in `Courses/{CourseName}/Pages/`
+6. Add `Courses/{CourseName}/Pages/{CourseName}Settings.razor` with route `/courses/{id}/settings`
+7. Add interactive panel component in `Courses/{CourseName}/Components/` if course needs custom lesson interactivity
